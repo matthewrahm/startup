@@ -31,15 +31,6 @@ Within the world of finance and stocks, there is a hidden gem known as cryptocur
 
 ![Design image](<website page 1.png>)![Design image 2](<website page 2.png>)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-```mermaid
-sequenceDiagram
-    actor You
-    actor Website
-    You->>Website: Replace this with your design
-```
-
 ### Key features
 
 - Live Price Updates: Provides instant access to the latest prices, ensuring users stay informed in the volatile meme coin market, continuously fetches and displays real-time price data for all tracked Solana meme coins, and helps trades make smart choices when choosing to buy or sell
@@ -61,21 +52,21 @@ I am going to use the required technologies in the following ways.
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Server deployed and accessible with custom domain name** - [My server link](https://yourdomainnamehere.click).
+- [ x] **Server deployed and accessible with custom domain name** - [My server link](https://ramencrypto.click).
 
 ## 🚀 HTML deliverable
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **HTML pages** - I did not complete this part of the deliverable.
-- [ ] **Proper HTML element usage** - I did not complete this part of the deliverable.
-- [ ] **Links** - I did not complete this part of the deliverable.
-- [ ] **Text** - I did not complete this part of the deliverable.
-- [ ] **3rd party API placeholder** - I did not complete this part of the deliverable.
-- [ ] **Images** - I did not complete this part of the deliverable.
-- [ ] **Login placeholder** - I did not complete this part of the deliverable.
-- [ ] **DB data placeholder** - I did not complete this part of the deliverable.
-- [ ] **WebSocket placeholder** - I did not complete this part of the deliverable.
+- [x ] **HTML pages** - I did complete this part of the deliverable.I added html pages for each section of my website that I will need.
+- [x ] **Proper HTML element usage** - Each html element that I incorporated works successfully and follows all guidelines.
+- [x ] **Links** - Each page is successfully linked
+- [x ] **Text** - Each text is properly formatted and working correctly.
+- [ x] **3rd party API placeholder** - Placeholder has been made, specifically for where my charts will go i used a simple logos.
+- [ x ] **Images** - I added images that I have access to and put placeholders for future images that I will need to scrape.
+- [ x] **Login placeholder** - I have an account creation section and temporary placeholder.
+- [x ] **DB data placeholder** - I have a database placeholder which is known as my watchlist section where the username and each selected coin will be displayed
+- [x ] **WebSocket placeholder** - Under each section that will require websocket I put proper placeholders for each one.
 
 ## 🚀 CSS deliverable
 

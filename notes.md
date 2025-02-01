@@ -19,9 +19,7 @@ No problems worked just like it said in the [instruction](https://github.com/web
 
 ## HTML
 
-This was easy. I was careful to use the correct structural elements such as header, footer, main, nav, and form. The links between the three views work great using the `a` element.
-
-The part I didn't like was the duplication of the header and footer code. This is messy, but it will get cleaned up when I get to React.
+Using my prior html experience, I am going to start by trying to design my home page in a very simple and clear manner. It was refreshing to study up on all the differnt types of inputs for my code.
 
 ## CSS
 
@@ -64,7 +62,17 @@ I also used SVG to make the icon and logo for the app. This turned out to be a p
 ```html
 <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
   <rect width="100" height="100" fill="#0066aa" rx="10" ry="10" />
-  <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-size="72" font-family="Arial" fill="white">C</text>
+  <text
+    x="50%"
+    y="50%"
+    dominant-baseline="central"
+    text-anchor="middle"
+    font-size="72"
+    font-family="Arial"
+    fill="white"
+  >
+    C
+  </text>
 </svg>
 ```
 
