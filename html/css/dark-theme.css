@@ -4,6 +4,52 @@ body {
     font-family: 'Arial', sans-serif;
 }
 
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.coin-info {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #1A1A1A;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.coin-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 18px;
+}
+
+.coin-details {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.coin-detail {
+    background-color: #222;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.watchlist {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #1A1A1A;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+
+
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -79,6 +125,9 @@ th, td {
 }
 
 footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
     background-color: #181818;
     color: #888;
     padding: 10px;
