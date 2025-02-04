@@ -72,12 +72,12 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Header, footer, and main content body** - I did not complete this part of the deliverable.
-- [ ] **Navigation elements** - I did not complete this part of the deliverable.
-- [ ] **Responsive to window resizing** - I did not complete this part of the deliverable.
-- [ ] **Application elements** - I did not complete this part of the deliverable.
-- [ ] **Application text content** - I did not complete this part of the deliverable.
-- [ ] **Application images** - I did not complete this part of the deliverable.
+- [ x] **Header, footer, and main content body** - I made them all in the design i wanted with the landing page using a bootstrap theme and custom for the other pages.
+- [ x] **Navigation elements** - I made my navbar include each oage, included a future search bar, and made it visually appealing.
+- [ x] **Responsive to window resizing** - I use flex and made sure that each element still fits with window resizing
+- [ x] **Application elements** - I made sure that the future websocket and data base features will fit the theme and the style.
+- [ x] **Application text content** - I made sure that the future websocket and data base features will fit the theme and the style.
+- [ x] **Application images** - I made sure that the future websocket and data base features will fit the theme and the style.
 
 ## 🚀 React part 1: Routing deliverable
 
