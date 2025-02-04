@@ -1,0 +1,19 @@
+body {
+    background-color: #121212; 
+    color: #E0E0E0;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Navbar Styling */
+.navbar {
+    background-color: #181818 !important;
+    border-bottom: 1px solid #333;
+}
+
+.navbar .nav-link {
+    color: #E0E0E0 !important;
+}
+
+.navbar .nav-link:hover {
+    color: #1DB954 !important; 
+}
