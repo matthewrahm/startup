@@ -83,9 +83,9 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Bundled using Vite** - I did not complete this part of the deliverable.
-- [ ] **Components** - I did not complete this part of the deliverable.
-- [ ] **Router** - Routing between login and voting components.
+- [ x] **Bundled using Vite** - I did complete this part of the deliverable. This was the first part and the easiest out of the whole project. Simple commnads to get it running.
+- [ x] **Components** - I did complete this part of the deliverable. This part took me the longest. When I did it for Simon, it did not take me that long at all. When I had to do it for all my own files, I ran into so many issues with React, my pages being incorrect, and so much more. I figured out that I was not linking my landing page properly and that I had to reconfigure the whole structure of my project. This took me way too many attempts and time for no reason. I also had to use the same photo as a placeholder in all the previous image spots.
+- [x ] **Router** - Routing between login and voting components.
 
 ## 🚀 React part 2: Reactivity
 
