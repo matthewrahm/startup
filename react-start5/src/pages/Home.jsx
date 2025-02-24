@@ -1,35 +1,23 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Navbar from "./Navbar";
+import { useAuth } from "../context/AuthContext";
 import "/src/components/css/dark-theme.css"; 
 import solanaLogo from "/solana.png"; 
 import chartImage from "../styles/solana.png"; 
 import logoImage from "../styles/solana.png"; 
 
 function Home() {
+  const { user } = useAuth();
+
   return (
     <>
-      {/* Header Section */}
-      <header>
-        <nav className="navbar">
-          <div className="logo">
-            <img src={logoImage} alt="Website Logo" />
-          </div>
-          <div className="nav-items">
-            <Link to="/">Login</Link>
-            <Link to="/home">Home</Link>
-            <Link to="/trending">Trending</Link>
-            <Link to="/watchlist">Watchlist</Link>
-            <div className="search-bar">
-              <input type="text" placeholder="Search..." />
-            </div>
-          </div>
-        </nav>
-      </header>
-
+      <Navbar />
+      
       {/* User Login Section */}
       <section className="user-login">
         <h3>
-          Welcome, <span id="username">User</span>
+          Welcome, <span id="username">{user?.email || 'User'}</span>
         </h3>
       </section>
 
