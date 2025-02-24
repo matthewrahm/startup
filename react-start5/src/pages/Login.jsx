@@ -1,8 +1,46 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "../components/css/styles.css"; 
 
 function Login() {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError('');
+
+    const validCredentials = {
+      email: 'user@example.com',
+      password: 'password123'
+    };
+
+    if (formData.email === validCredentials.email && formData.password === validCredentials.password) {
+      const userData = {
+        email: formData.email,
+        isAuthenticated: true,
+        loginTime: new Date().toISOString()
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      navigate('/home');
+    } else {
+      setError('Invalid email or password');
+    }
+  };
+
   return (
     <>
       {/* Navbar */}
@@ -31,7 +69,7 @@ function Login() {
           <div className="mx-auto text-center">
             <h1 className="text-white">Welcome to Ramen Crypto</h1>
             <br />
-            <a className="btn" href="#">Login and Hit Home to Get Started</a>
+            <p className="text-white-50">Login to access real-time crypto tracking</p>
           </div>
         </div>
       </header>
@@ -39,16 +77,40 @@ function Login() {
       {/* Login Section */}
       <section id="login" className="text-center">
         <div className="container">
-          <h2 className="text-white">Login to Begin</h2>
-          <form action="#" method="POST" id="login-form" className="form-inline d-flex flex-column align-items-center">
+          <h2 className="text-white mb-4">Login to Begin</h2>
+          {error && <div className="alert alert-danger mb-3">{error}</div>}
+          <form onSubmit={handleSubmit} className="form-inline d-flex flex-column align-items-center">
             <div className="form-group mb-3">
-              <input type="email" id="email" name="email" className="form-control" placeholder="Enter your username" required />
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                className="form-control" 
+                placeholder="Enter your email" 
+                value={formData.email}
+                onChange={handleChange}
+                required 
+              />
             </div>
             <div className="form-group mb-3">
-              <input type="password" id="password" name="password" className="form-control" placeholder="Enter your password" required />
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                className="form-control" 
+                placeholder="Enter your password" 
+                value={formData.password}
+                onChange={handleChange}
+                required 
+              />
             </div>
-            <button type="submit" className="btn">Login</button>
+            <button type="submit" className="btn btn-primary">Login</button>
           </form>
+          <div className="mt-3 text-white-50">
+            <p>Test credentials:</p>
+            <p>Email: user@example.com</p>
+            <p>Password: password123</p>
+          </div>
         </div>
       </section>
 
@@ -59,9 +121,6 @@ function Login() {
           <a href="https://github.com/matthewrahm/startup.git" target="_blank" rel="noopener noreferrer" className="text-black">GitHub</a>
         </div>
       </footer>
-
-      {/* Bootstrap JS */}
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </>
   );
 }
