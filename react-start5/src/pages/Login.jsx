@@ -5,10 +5,9 @@ import "../components/css/styles.css";
 
 function Login() {
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: ''
   });
-  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -22,24 +21,10 @@ function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
-
-    const validCredentials = {
-      email: 'user@example.com',
-      password: 'password123'
-    };
-
-    if (formData.email === validCredentials.email && formData.password === validCredentials.password) {
-      const userData = {
-        email: formData.email,
-        isAuthenticated: true,
-        loginTime: new Date().toISOString()
-      };
-      login(userData);
-      navigate('/home');
-    } else {
-      setError('Invalid email or password');
-    }
+    
+    // Accept any username/password combination
+    login({ username: formData.username });
+    navigate('/home');
   };
 
   return (
@@ -70,7 +55,7 @@ function Login() {
           <div className="mx-auto text-center">
             <h1 className="text-white">Welcome to Ramen Crypto</h1>
             <br />
-            <p className="text-white-50">Login to access real-time crypto tracking</p>
+            <p className="text-white-50">Enter username to start tracking crypto</p>
           </div>
         </div>
       </header>
@@ -79,16 +64,15 @@ function Login() {
       <section id="login" className="text-center">
         <div className="container">
           <h2 className="text-white mb-4">Login to Begin</h2>
-          {error && <div className="alert alert-danger mb-3">{error}</div>}
           <form onSubmit={handleSubmit} className="form-inline d-flex flex-column align-items-center">
             <div className="form-group mb-3">
               <input 
-                type="email" 
-                id="email" 
-                name="email" 
+                type="text" 
+                id="username" 
+                name="username" 
                 className="form-control" 
-                placeholder="Enter your email" 
-                value={formData.email}
+                placeholder="Enter your username" 
+                value={formData.username}
                 onChange={handleChange}
                 required 
               />
@@ -108,9 +92,7 @@ function Login() {
             <button type="submit" className="btn btn-primary">Login</button>
           </form>
           <div className="mt-3 text-white-50">
-            <p>Test credentials:</p>
-            <p>Email: user@example.com</p>
-            <p>Password: password123</p>
+            <p>Enter a username and password to continue</p>
           </div>
         </div>
       </section>
@@ -126,4 +108,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Login

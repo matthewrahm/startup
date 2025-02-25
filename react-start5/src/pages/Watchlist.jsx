@@ -14,11 +14,11 @@ function Watchlist() {
       <Navbar />
       <main>
         <section className="user-info">
-          <h2>Welcome, <span id="username">{user?.email || 'User'}</span></h2>
+          <h2>Welcome, <span id="username">{user?.username || 'User'}</span></h2>
           <h3>Your Watchlist</h3>
 
           {watchlist.length === 0 ? (
-            <p>No coins in your watchlist yet. Add some from the Home or Trending page!</p>
+            <p>No coins in your watchlist yet. Add some from the Home page!</p>
           ) : (
             <div className="watchlist-grid">
               {watchlist.map((coin) => (
@@ -64,4 +64,4 @@ function Watchlist() {
   );
 }
 
-export default Watchlist;
+export default Watchlist

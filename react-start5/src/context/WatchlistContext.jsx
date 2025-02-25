@@ -38,7 +38,7 @@ export const WatchlistProvider = ({ children }) => {
   const addToWatchlist = (coin) => {
     // Check if coin is already in watchlist
     if (watchlist.some(item => item.id === coin.id)) {
-      showNotification(`${coin.name} is already in your watchlist!`, coin.id, 'success', window.location.pathname.includes('trending') ? 'trending' : 'home');
+      showNotification(`${coin.name} is in your watchlist!`, coin.id, 'success', window.location.pathname.includes('trending') ? 'trending' : 'home');
       return;
     }
 
