@@ -20,7 +20,7 @@ export const WatchlistProvider = ({ children }) => {
     }
   }, []);
 
-  const showNotification = (message, coinId, type = 'success', page = 'home') => {
+  const showNotification = (message, coinId, type = 'success', page) => {
     // Clear any existing notification first
     setNotification({ show: false, message: '', coinId: null, type: 'success', page: null });
     
@@ -38,14 +38,14 @@ export const WatchlistProvider = ({ children }) => {
   const addToWatchlist = (coin) => {
     // Check if coin is already in watchlist
     if (watchlist.some(item => item.id === coin.id)) {
-      showNotification(`${coin.name} is already in your watchlist!`, coin.id, 'success', 'home');
+      showNotification(`${coin.name} is already in your watchlist!`, coin.id, 'success', window.location.pathname.includes('trending') ? 'trending' : 'home');
       return;
     }
 
     const updatedWatchlist = [...watchlist, coin];
     setWatchlist(updatedWatchlist);
     localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
-    showNotification(`${coin.name} added to watchlist!`, coin.id, 'success', 'home');
+    showNotification(`${coin.name} added to watchlist!`, coin.id, 'success', window.location.pathname.includes('trending') ? 'trending' : 'home');
   };
 
   const removeFromWatchlist = (coin) => {
