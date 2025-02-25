@@ -1,86 +1,61 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import Navbar from "./Navbar";
+import { useAuth } from "../context/AuthContext";
+import { useWatchlist } from "../context/WatchlistContext";
 import "/src/components/css/dark-theme.css"; 
 
-import logoImage from "../styles/solana.png"; 
-import coinPlaceholder from "../styles/solana.png"; 
 
 function Watchlist() {
-  const favoriteCoins = [
-    { name: "WebSocket", price: "$", age: "h", txns: "", volume: "$", fiveMin: "%", oneHour: "%", twentyFourHr: "%", liquidity: "$", marketCap: "$" },
-    { name: "WebSocket", price: "$", age: "h", txns: "", volume: "$", fiveMin: "%", oneHour: "%", twentyFourHr: "%", liquidity: "$", marketCap: "$" },
-    { name: "WebSocket", price: "$", age: "h", txns: "", volume: "$", fiveMin: "%", oneHour: "%", twentyFourHr: "%", liquidity: "$", marketCap: "$" },
-    { name: "WebSocket", price: "$", age: "h", txns: "", volume: "$", fiveMin: "%", oneHour: "%", twentyFourHr: "%", liquidity: "$", marketCap: "$" },
-    { name: "WebSocket", price: "$", age: "h", txns: "", volume: "$", fiveMin: "%", oneHour: "%", twentyFourHr: "%", liquidity: "$", marketCap: "$" },
-  ];
+  const { user } = useAuth();
+  const { watchlist, removeFromWatchlist, notification } = useWatchlist();
 
   return (
     <>
-      {/* Header Section */}
-      <header>
-        <nav className="navbar">
-          <div className="logo">
-            <img src={logoImage} alt="Website Logo" />
-          </div>
-          <div className="nav-items">
-            <Link to="/">Login</Link>
-            <Link to="/home">Home</Link>
-            <Link to="/trending">Trending</Link>
-            <Link to="/watchlist">Watchlist</Link>
-            <div className="search-bar">
-              <input type="text" placeholder="Search..." />
-            </div>
-          </div>
-        </nav>
-      </header>
-
-      {/* Main Content */}
+      <Navbar />
       <main>
         <section className="user-info">
-          <h2>Welcome, <span id="username">Username</span></h2>
-          <h3>Your Favorite Coins</h3>
+          <h2>Welcome, <span id="username">{user?.email || 'User'}</span></h2>
+          <h3>Your Watchlist</h3>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Token</th>
-                <th>Price</th>
-                <th>Age</th>
-                <th>TXNS</th>
-                <th>Volume</th>
-                <th>5m</th>
-                <th>1h</th>
-                <th>24h</th>
-                <th>Liquidity</th>
-                <th>Market Cap</th>
-              </tr>
-            </thead>
-            <tbody>
-              {favoriteCoins.map((coin, index) => (
-                <tr key={index}>
-                  <td>
-                    <img src={coinPlaceholder} alt="Coin Logo" /> {coin.name}
-                  </td>
-                  <td>{coin.price}</td>
-                  <td>{coin.age}</td>
-                  <td>{coin.txns}</td>
-                  <td>{coin.volume}</td>
-                  <td>{coin.fiveMin}</td>
-                  <td>{coin.oneHour}</td>
-                  <td>{coin.twentyFourHr}</td>
-                  <td>{coin.liquidity}</td>
-                  <td>{coin.marketCap}</td>
-                </tr>
+          {watchlist.length === 0 ? (
+            <p>No coins in your watchlist yet. Add some from the Home or Trending page!</p>
+          ) : (
+            <div className="watchlist-grid">
+              {watchlist.map((coin) => (
+                <div key={coin.id} className="watchlist-item">
+                  <h3>{coin.name}</h3>
+                  <div className="coin-stats">
+                    <p>Price: {coin.price}</p>
+                    <p>Volume: {coin.volume}</p>
+                    <p>TXNS: {coin.txns}</p>
+                  </div>
+                  <div className="watchlist-action">
+                    <button
+                      onClick={() => removeFromWatchlist(coin)}
+                      className="remove-btn"
+                    >
+                      Remove from Watchlist
+                    </button>
+                    {notification.show && notification.coinId === coin.id && notification.page === 'watchlist' && (
+                      <div className={`notification-inline ${notification.type}`}>
+                        <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                          <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                          <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                        <span>{notification.message}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
         </section>
       </main>
 
-      {/* Footer Section */}
       <footer>
         <div>
-          <a href="https://github.com/your-github" target="_blank" rel="noopener noreferrer" id="github-link">
+          <a href="https://github.com/matthewrahm/startup.git" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
         </div>

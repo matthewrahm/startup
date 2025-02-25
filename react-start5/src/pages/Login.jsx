@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../components/css/styles.css"; 
+import { useAuth } from '../context/AuthContext';
+import "../components/css/styles.css";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ function Login() {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,8 +35,7 @@ function Login() {
         isAuthenticated: true,
         loginTime: new Date().toISOString()
       };
-      localStorage.setItem('user', JSON.stringify(userData));
-      
+      login(userData);
       navigate('/home');
     } else {
       setError('Invalid email or password');

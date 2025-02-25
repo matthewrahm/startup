@@ -1,8 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import Navbar from "./Navbar"
+import { useAuth } from "../context/AuthContext";
+
 import "/src/components/css/dark-theme.css"; 
 
-import logoImage from "../styles/solana.png"; 
 import coinPlaceholder from "../styles/solana.png"; 
 
 function Trending() {
@@ -16,23 +17,7 @@ function Trending() {
 
   return (
     <>
-      {/* Header Section */}
-      <header>
-        <nav className="navbar">
-          <div className="logo">
-            <img src={logoImage} alt="Website Logo" />
-          </div>
-          <div className="nav-items">
-            <Link to="/">Login</Link>
-            <Link to="/home">Home</Link>
-            <Link to="/trending">Trending</Link>
-            <Link to="/watchlist">Watchlist</Link>
-            <div className="search-bar">
-              <input type="text" placeholder="Search..." />
-            </div>
-          </div>
-        </nav>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <main>
@@ -77,7 +62,7 @@ function Trending() {
       {/* Footer Section */}
       <footer>
         <div>
-          <a href="https://github.com/your-github" target="_blank" rel="noopener noreferrer" id="github-link">
+          <a href="https://github.com/matthewrahm/startup.git" target="_blank" rel="noopener noreferrer" id="github-link">
             GitHub
           </a>
         </div>

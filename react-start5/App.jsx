@@ -1,13 +1,11 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider, useAuth } from './src/context/AuthContext';
-import Home from "./src/pages/Home";
-import Trending from "./src/pages/Trending";
-import Watchlist from "./src/pages/Watchlist";
-import Login from "./src/pages/Login";
-import Navbar from "./src/pages/Navbar";
-
-
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from '../react-start5/src/context/AuthContext';
+import { WatchlistProvider } from '../react-start5/src/context/WatchlistContext';
+import Login from './src/pages/Login';
+import Home from './src/pages/Home';
+import Trending from './src/pages/Trending';
+import Watchlist from './src/pages/Watchlist';
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -19,37 +17,39 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/trending"
-            element={
-              <ProtectedRoute>
-                <Trending />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/watchlist"
-            element={
-              <ProtectedRoute>
-                <Watchlist />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <WatchlistProvider>
+        <div className="app-container">
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route
+              path="/home"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trending"
+              element={
+                <ProtectedRoute>
+                  <Trending />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/watchlist"
+              element={
+                <ProtectedRoute>
+                  <Watchlist />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </WatchlistProvider>
+    </AuthProvider>
   );
 }
 
