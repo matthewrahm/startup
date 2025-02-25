@@ -21,7 +21,7 @@ function Home() {
       <main>
         <div className="coin-info">
           <div className="coin-header">
-            <img src="/solana.png" alt="Solana Logo" style={{ width: "220px", height: "200px" }} />
+            <img src="/solana.png" alt="Solana Logo" />
           </div>
           <div className="coin-stats">
             <span>24h Volume: $<span id="volume">1.5B</span></span>
