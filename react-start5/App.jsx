@@ -46,6 +46,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+         {/* Catch-all route to redirect to login if not authenticated */}
+         <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </WatchlistProvider>

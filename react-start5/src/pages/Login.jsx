@@ -9,7 +9,14 @@ function Login() {
     password: ''
   });
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, login } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,9 +47,6 @@ function Login() {
           </button>
           <div className="collapse navbar-collapse" id="navbarResponsive">
             <ul className="navbar-nav ms-auto">
-              <li className="nav-item"><Link className="nav-link" to="/home">Home</Link></li>
-              <li className="nav-item"><Link className="nav-link" to="/trending">Trending</Link></li>
-              <li className="nav-item"><Link className="nav-link" to="/watchlist">Watchlist</Link></li>
               <li className="nav-item"><Link className="nav-link" to="/">Login</Link></li>
             </ul>
           </div>
@@ -55,7 +59,7 @@ function Login() {
           <div className="mx-auto text-center">
             <h1 className="text-white">Welcome to Ramen Crypto</h1>
             <br />
-            <p className="text-white-50">Enter username to start tracking crypto</p>
+            <p className="text-white-50">Enter any username to start tracking crypto</p>
           </div>
         </div>
       </header>
@@ -92,7 +96,7 @@ function Login() {
             <button type="submit" className="btn btn-primary">Login</button>
           </form>
           <div className="mt-3 text-white-50">
-            <p>Enter a username and password to continue</p>
+            <p>Enter any username and password to continue</p>
           </div>
         </div>
       </section>
@@ -108,4 +112,4 @@ function Login() {
   );
 }
 
-export default Login
+export default Login;
