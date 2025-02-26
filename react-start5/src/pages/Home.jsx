@@ -6,9 +6,9 @@ import "/src/components/css/dark-theme.css";
 
 
 const dummyCoins = [
-  { id: 1, name: "Coin 1", price: "$100", volume: "$1M", txns: "10K" },
-  { id: 2, name: "Coin 2", price: "$200", volume: "$2M", txns: "20K" },
-  { id: 3, name: "Coin 3", price: "$300", volume: "$3M", txns: "30K" },
+  { id: 1, name: "POPCAT", price: "$100", volume: "$1M", txns: "10K", image: "https://cryptologos.cc/logos/shiba-inu-shib-logo.png" },
+  { id: 2, name: "CHILLGUY", price: "$200", volume: "$2M", txns: "20K", image: "https://cryptologos.cc/logos/dogecoin-doge-logo.png" },
+  { id: 3, name: "PEPE", price: "$300", volume: "$3M", txns: "30K", image: "https://cryptologos.cc/logos/pepe-pepe-logo.png" },
 ];
 
 function Home() {
@@ -39,7 +39,10 @@ function Home() {
         <section className="coin-details">
           {dummyCoins.map((coin) => (
             <div className="coin-detail" key={coin.id}>
-              <h3>{coin.name}</h3>
+              <div className="coin-detail-header" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                <img src={coin.image} alt={coin.name} style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+                <h3>{coin.name}</h3>
+              </div>
               <div className="coin-stats">
                 <p>Price: {coin.price}</p>
                 <p>Volume: {coin.volume}</p>
