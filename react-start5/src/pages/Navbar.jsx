@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SearchBar from '../components/SearchBar';
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -14,7 +15,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="logo">
-        <img src="/src/styles/solana.png" alt="Website Logo" />
+        <img src="/solana.png" alt="Website Logo" />
       </div>
       <div className="nav-items">
         {user ? (
@@ -22,10 +23,8 @@ function Navbar() {
             <Link to="/home">Home</Link>
             <Link to="/trending">Trending</Link>
             <Link to="/watchlist">Watchlist</Link>
-            <button onClick={handleLogout} className="nav-link">Logout</button>
-            <div className="search-bar">
-              <input type="text" placeholder="Search..." />
-            </div>
+            <SearchBar />
+            <button onClick={handleLogout} className="watchlist-btn">Logout</button>
           </>
         ) : (
           <Link to="/">Login</Link>
