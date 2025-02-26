@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 // Combine all coins data for search
 const allCoins = [
   // Home page coins
-  { id: 1, name: "Coin 1", page: "home" },
-  { id: 2, name: "Coin 2", page: "home" },
-  { id: 3, name: "Coin 3", page: "home" },
+  { id: 1, name: "POPCAT", page: "home" },
+  { id: 2, name: "CHILLGUY", page: "home" },
+  { id: 3, name: "PEPE", page: "home" },
   
   // Trending page coins
   { id: 'btc', name: 'Bitcoin', symbol: 'BTC', page: "trending" },
