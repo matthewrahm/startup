@@ -218,7 +218,29 @@ main {
   gap: 1rem;
 }
 
+.coin-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.coin-detail-header img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
 /* Login page styles */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
 .masthead {
   min-height: 400px;
   padding: 8rem 0;
@@ -226,19 +248,46 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--bg-primary);
 }
 
 .masthead h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.masthead p {
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
 }
 
 #login {
   padding: 4rem 0;
+  background-color: var(--bg-primary);
 }
 
 #login .container {
   max-width: 400px;
+}
+
+#login h2 {
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
 }
 
 .form-control {
@@ -249,6 +298,16 @@ main {
   border-radius: 4px;
   background: var(--bg-secondary);
   color: var(--text-primary);
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.login-help {
+  margin-top: 1.5rem;
+  color: var(--text-secondary);
 }
 
 /* Watchlist page styles */
@@ -372,6 +431,26 @@ footer a {
 
 footer a:hover {
   color: var(--text-primary);
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 /* Animations */
