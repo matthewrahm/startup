@@ -6,9 +6,9 @@ import "/src/components/css/dark-theme.css";
 
 
 const dummyCoins = [
-  { id: 1, name: "POPCAT", price: "$100", volume: "$1M", txns: "10K", image: "https://cryptologos.cc/logos/shiba-inu-shib-logo.png" },
-  { id: 2, name: "CHILLGUY", price: "$200", volume: "$2M", txns: "20K", image: "https://cryptologos.cc/logos/dogecoin-doge-logo.png" },
-  { id: 3, name: "PEPE", price: "$300", volume: "$3M", txns: "30K", image: "https://cryptologos.cc/logos/pepe-pepe-logo.png" },
+  { id: 1, name: "POPCAT", price: "$100", volume: "$1M", txns: "10K", image: "https://www.newsbtc.com/wp-content/uploads/2024/08/a_c243d3.jpg?fit=1500%2C1001" },
+  { id: 2, name: "CHILLGUY", price: "$200", volume: "$2M", txns: "20K", image: "https://pbs.twimg.com/media/GdunH3eWgAA2RFH?format=jpg&name=large" },
+  { id: 3, name: "PEPE", price: "$300", volume: "$3M", txns: "30K", image: "https://bitcoinist.com/wp-content/uploads/2023/04/Screenshot-2023-04-19-at-12.10.16-PM.png?fit=1560%2C790" },
 ];
 
 function Home() {
