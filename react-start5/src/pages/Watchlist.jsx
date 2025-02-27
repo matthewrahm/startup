@@ -23,7 +23,14 @@ function Watchlist() {
             <div className="watchlist-grid">
               {watchlist.map((coin) => (
                 <div key={coin.id} className="watchlist-item">
-                  <h3>{coin.name}</h3>
+                  <div className="coin-detail-header">
+                    <img 
+                      src={coin.image || "/solana.png"} 
+                      alt={coin.name} 
+                      className="coin-image" 
+                    />
+                    <h3>{coin.name}</h3>
+                  </div>
                   <div className="coin-stats">
                     <p>Price: {coin.price}</p>
                     <p>Volume: {coin.volume}</p>

@@ -398,7 +398,7 @@ main {
 }
 
 .remove-btn {
-  background-color: var(--remove-color);
+  background: linear-gradient(45deg, #FF4545, #FF7676);
   color: var(--text-primary);
   border: none;
   padding: 0.75rem 1.5rem;
@@ -412,6 +412,7 @@ main {
 .remove-btn:hover {
   opacity: 0.9;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 69, 69, 0.2);
 }
 
 /* Notification styles */
