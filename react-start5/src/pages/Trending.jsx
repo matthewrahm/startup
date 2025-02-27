@@ -26,6 +26,21 @@ const trendingCoins = [
 function Trending() {
   const { addToWatchlist, notification } = useWatchlist();
 
+  // Function to handle adding a coin to watchlist
+  const handleAddToWatchlist = (coin) => {
+    // Ensure the coin has all required properties for the watchlist
+    const watchlistCoin = {
+      ...coin,
+      // Add default values for any missing properties
+      image: coin.image || "/solana.png", // Use default image if none provided
+      price: coin.price || "$0.00",
+      volume: coin.volume || "$0",
+      txns: coin.txns || "0"
+    };
+    
+    addToWatchlist(watchlistCoin);
+  };
+
   return (
     <>
       <Navbar />
@@ -59,7 +74,7 @@ function Trending() {
                 </div>
                 <div className="watchlist-action">
                   <button
-                    onClick={() => addToWatchlist(coin)}
+                    onClick={() => handleAddToWatchlist(coin)}
                     className="watchlist-btn"
                   >
                     Add to Watchlist
@@ -104,6 +119,7 @@ function Trending() {
                   <tr key={coin.id}>
                     <td>
                       <div className="coin-cell">
+                        <img src="/solana.png" alt="Coin Logo" className="coin-icon" />
                         <span>{coin.name}</span>
                       </div>
                     </td>
@@ -119,7 +135,7 @@ function Trending() {
                     <td>
                       <div className="watchlist-action">
                         <button
-                          onClick={() => addToWatchlist(coin)}
+                          onClick={() => handleAddToWatchlist(coin)}
                           className="watchlist-btn-small"
                         >
                           Add
