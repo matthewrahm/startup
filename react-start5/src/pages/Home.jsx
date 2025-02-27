@@ -39,8 +39,8 @@ function Home() {
         <section className="coin-details">
           {dummyCoins.map((coin) => (
             <div className="coin-detail" key={coin.id}>
-              <div className="coin-detail-header" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <img src={coin.image} alt={coin.name} style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+              <div className="coin-detail-header">
+                <img src={coin.image} alt={coin.name} className="coin-image" />
                 <h3>{coin.name}</h3>
               </div>
               <div className="coin-stats">

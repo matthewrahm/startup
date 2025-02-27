@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
-import "../components/css/styles.css";
+import "../components/css/Login.css";
+
 function Login() {
   const [formData, setFormData] = useState({
     username: '',
@@ -27,102 +28,34 @@ function Login() {
   };
 
   return (
-    <div style={{ backgroundColor: "#121212", color: "#E0E0E0", minHeight: "100vh" }}>
-      {/* Navbar */}
-      <nav style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "center", 
-        backgroundColor: "#1A1A1A", 
-        padding: "1rem 2rem" 
-      }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <img 
-            src="/solana.png" 
-            alt="Website Logo" 
-            style={{ 
-              height: "40px", 
-              width: "40px", 
-              borderRadius: "50%", 
-              boxShadow: "0 0 10px rgba(20, 241, 149, 0.3)" 
-            }} 
-          />
+    <div className="login-container">
+      <div className="login-content">
+        <div className="login-header">
+          <h1>Welcome to Ramen Crypto</h1>
+          <p>Enter any username to start tracking crypto</p>
         </div>
-        <div style={{ display: "flex", gap: "2rem", alignItems: "center" }}>
-          <a href="/" style={{ color: "#E0E0E0", textDecoration: "none" }}>Login</a>
-        </div>
-      </nav>
-
-      {/* Header Section */}
-      <header style={{ 
-        minHeight: "400px", 
-        padding: "8rem 0", 
-        textAlign: "center", 
-        display: "flex", 
-        alignItems: "center", 
-        justifyContent: "center" 
-      }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
-          <div style={{ textAlign: "center" }}>
-            <h1 style={{ fontSize: "2.5rem", marginBottom: "1rem", color: "#E0E0E0" }}>
-              Welcome to Ramen Crypto
-            </h1>
-            <p style={{ color: "#888", fontSize: "1.2rem", marginBottom: "2rem" }}>
-              Enter any username to start tracking crypto
-            </p>
-          </div>
-        </div>
-      </header>
-
-      {/* Login Section */}
-      <section style={{ padding: "4rem 0", textAlign: "center" }}>
-        <div style={{ maxWidth: "400px", margin: "0 auto", padding: "0 1rem" }}>
-          <h2 style={{ marginBottom: "2rem", color: "#E0E0E0" }}>Login to Begin</h2>
-          <form 
-            onSubmit={handleSubmit} 
-            style={{ 
-              display: "flex", 
-              flexDirection: "column", 
-              gap: "1rem", 
-              width: "100%", 
-              maxWidth: "400px", 
-              margin: "0 auto" 
-            }}
-          >
-            <div style={{ marginBottom: "1.5rem" }}>
+        
+        <div className="login-form-container">
+          <h2>Login to Begin</h2>
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
               <input 
                 type="text" 
                 id="username" 
                 name="username" 
-                style={{ 
-                  width: "100%", 
-                  padding: "0.75rem", 
-                  marginBottom: "1rem", 
-                  border: "1px solid #888", 
-                  borderRadius: "4px", 
-                  background: "#1A1A1A", 
-                  color: "#E0E0E0" 
-                }} 
+                className="login-input"
                 placeholder="Enter your username" 
                 value={formData.username}
                 onChange={handleChange}
                 required 
               />
             </div>
-            <div style={{ marginBottom: "1.5rem" }}>
+            <div className="form-group">
               <input 
                 type="password" 
                 id="password" 
                 name="password" 
-                style={{ 
-                  width: "100%", 
-                  padding: "0.75rem", 
-                  marginBottom: "1rem", 
-                  border: "1px solid #888", 
-                  borderRadius: "4px", 
-                  background: "#1A1A1A", 
-                  color: "#E0E0E0" 
-                }} 
+                className="login-input"
                 placeholder="Enter your password" 
                 value={formData.password}
                 onChange={handleChange}
@@ -131,46 +64,16 @@ function Login() {
             </div>
             <button 
               type="submit" 
-              style={{ 
-                background: "linear-gradient(45deg, #9945FF, #14F195)", 
-                color: "#E0E0E0", 
-                border: "none", 
-                padding: "0.75rem 1.5rem", 
-                borderRadius: "6px", 
-                cursor: "pointer", 
-                fontWeight: "600", 
-                width: "100%", 
-                marginTop: "1rem" 
-              }}
+              className="login-button"
             >
               Login
             </button>
           </form>
-          <div style={{ marginTop: "1.5rem", color: "#888" }}>
+          <div className="login-help">
             <p>Enter any username and password to continue</p>
           </div>
         </div>
-      </section>
-
-      {/* Footer Section */}
-      <footer style={{ 
-        textAlign: "center", 
-        padding: "2rem", 
-        backgroundColor: "#1A1A1A", 
-        marginTop: "auto" 
-      }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
-          <p>Powered by Ramen Crypto</p>
-          <a 
-            href="https://github.com/matthewrahm/startup.git" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            style={{ color: "#14F195", textDecoration: "none" }}
-          >
-            GitHub
-          </a>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }

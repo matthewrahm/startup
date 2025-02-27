@@ -104,7 +104,6 @@ function Trending() {
                   <tr key={coin.id}>
                     <td>
                       <div className="coin-cell">
-                        <img src="/solana.png" alt="Coin Logo" className="coin-icon" />
                         <span>{coin.name}</span>
                       </div>
                     </td>
