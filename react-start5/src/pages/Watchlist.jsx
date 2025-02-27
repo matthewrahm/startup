@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import { useAuth } from "../context/AuthContext";
 import { useWatchlist } from "../context/WatchlistContext";
 import "/src/components/css/dark-theme.css"; 
+import FadeInImage from "../components/FadeInImage";
 
 
 function Watchlist() {
@@ -24,7 +25,7 @@ function Watchlist() {
               {watchlist.map((coin) => (
                 <div key={coin.id} className="watchlist-item">
                   <div className="coin-detail-header">
-                    <img 
+                    <FadeInImage 
                       src={coin.image || "/solana.png"} 
                       alt={coin.name} 
                       className="coin-image" 

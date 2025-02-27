@@ -1,8 +1,8 @@
 import React from "react";
 import Navbar from "./Navbar"
 import { useWatchlist } from "../context/WatchlistContext";
-
 import "../components/css/trending.css";
+import FadeInImage from "../components/FadeInImage";
 
 
 // Top 5 coins data
@@ -52,7 +52,11 @@ function Trending() {
             {topCoins.map((coin) => (
               <div key={coin.id} className="top-coin-card">
                 <div className="coin-header">
-                  <img src={coin.image} alt={coin.name} className="coin-logo" />
+                  <FadeInImage 
+                    src={coin.image} 
+                    alt={coin.name} 
+                    className="coin-logo" 
+                  />
                   <div className="coin-title">
                     <h3>{coin.name}</h3>
                     <span className="coin-symbol">{coin.symbol}</span>
@@ -119,7 +123,11 @@ function Trending() {
                   <tr key={coin.id}>
                     <td>
                       <div className="coin-cell">
-                        <img src="/solana.png" alt="Coin Logo" className="coin-icon" />
+                        <FadeInImage 
+                          src="/solana.png" 
+                          alt="Coin Logo" 
+                          className="coin-icon" 
+                        />
                         <span>{coin.name}</span>
                       </div>
                     </td>

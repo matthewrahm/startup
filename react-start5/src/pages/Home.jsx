@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import { useAuth } from "../context/AuthContext";
 import { useWatchlist } from "../context/WatchlistContext";
 import "/src/components/css/dark-theme.css"; 
+import FadeInImage from "../components/FadeInImage";
 
 
 const dummyCoins = [
@@ -15,13 +16,28 @@ function Home() {
   const { user } = useAuth();
   const { addToWatchlist, notification } = useWatchlist();
 
+  // Function to handle adding a coin to watchlist
+  const handleAddToWatchlist = (coin) => {
+    // Ensure the coin has all required properties for the watchlist
+    const watchlistCoin = {
+      ...coin,
+      // Add default values for any missing properties
+      image: coin.image || "/solana.png", // Use default image if none provided
+      price: coin.price || "$0.00",
+      volume: coin.volume || "$0",
+      txns: coin.txns || "0"
+    };
+    
+    addToWatchlist(watchlistCoin);
+  };
+
   return (
     <>
       <Navbar />
       <main>
         <div className="coin-info">
           <div className="coin-header">
-            <img src="/solana.png" alt="Solana Logo" />
+            <FadeInImage src="/solana.png" alt="Solana Logo" />
           </div>
           <div className="coin-stats">
             <span>24h Volume: $<span id="volume">1.5B</span></span>
@@ -40,7 +56,11 @@ function Home() {
           {dummyCoins.map((coin) => (
             <div className="coin-detail" key={coin.id}>
               <div className="coin-detail-header">
-                <img src={coin.image} alt={coin.name} className="coin-image" />
+                <FadeInImage 
+                  src={coin.image} 
+                  alt={coin.name} 
+                  className="coin-image" 
+                />
                 <h3>{coin.name}</h3>
               </div>
               <div className="coin-stats">
@@ -50,7 +70,7 @@ function Home() {
               </div>
               <div className="watchlist-action">
                 <button
-                  onClick={() => addToWatchlist(coin)}
+                  onClick={() => handleAddToWatchlist(coin)}
                   className="watchlist-btn"
                 >
                   Add to Watchlist

@@ -5,6 +5,7 @@ import App from "./App";
 import "./src/components/css/styles.css"; 
 import "./src/components/css/dark-theme.css";  
 import "./src/components/css/trending.css";
+import "./src/components/css/image-transitions.css";
 
 
 

@@ -2,6 +2,8 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import SearchBar from '../components/SearchBar';
+import FadeInImage from "../components/FadeInImage";
+
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -15,7 +17,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="logo">
-        <img src="/solana.png" alt="Website Logo" />
+        <FadeInImage src="/solana.png" alt="Website Logo" />
       </div>
       <div className="nav-items">
         {user ? (
