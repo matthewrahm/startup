@@ -1,0 +1,82 @@
+/* Image Transition Styles */
+.fade-in-image {
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+    will-change: opacity, transform;
+    transform: translateY(10px);
+  }
+  
+  .fade-in-image.loaded {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Different durations for different elements */
+  .coin-logo.fade-in-image {
+    transition-duration: 0.5s;
+  }
+  
+  .coin-header img.fade-in-image {
+    transition-duration: 0.8s;
+  }
+  
+  .coin-image.fade-in-image {
+    transition-duration: 0.4s;
+  }
+  
+  .coin-icon.fade-in-image {
+    transition-duration: 0.3s;
+  }
+  
+  /* Staggered loading for lists */
+  .watchlist-item:nth-child(1) .fade-in-image,
+  .coin-detail:nth-child(1) .fade-in-image,
+  .top-coin-card:nth-child(1) .fade-in-image {
+    transition-delay: 0.05s;
+  }
+  
+  .watchlist-item:nth-child(2) .fade-in-image,
+  .coin-detail:nth-child(2) .fade-in-image,
+  .top-coin-card:nth-child(2) .fade-in-image {
+    transition-delay: 0.1s;
+  }
+  
+  .watchlist-item:nth-child(3) .fade-in-image,
+  .coin-detail:nth-child(3) .fade-in-image,
+  .top-coin-card:nth-child(3) .fade-in-image {
+    transition-delay: 0.15s;
+  }
+  
+  .watchlist-item:nth-child(4) .fade-in-image,
+  .coin-detail:nth-child(4) .fade-in-image,
+  .top-coin-card:nth-child(4) .fade-in-image {
+    transition-delay: 0.2s;
+  }
+  
+  .watchlist-item:nth-child(5) .fade-in-image,
+  .coin-detail:nth-child(5) .fade-in-image,
+  .top-coin-card:nth-child(5) .fade-in-image {
+    transition-delay: 0.25s;
+  }
+  
+  /* Shimmer effect for loading state */
+  .image-placeholder {
+    background: linear-gradient(90deg, var(--bg-secondary) 0%, rgba(26, 26, 26, 0.8) 50%, var(--bg-secondary) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: inherit;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
