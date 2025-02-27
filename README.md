@@ -91,8 +91,8 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **All functionality implemented or mocked out** - I did not complete this part of the deliverable.
-- [ ] **Hooks** - I did not complete this part of the deliverable.
+- [ x] **All functionality implemented or mocked out** - I did complete this part of the deliverable. I am loving the way that the website is turning out to be. I became addicted to wokring on it and making it look as good as it possibly can be. Everything works great and all the data is saved and stored.
+- [ x] **Hooks** - I did complete this part of the deliverable. I used a lot of hooks and this took me a great deal of time to do but my website is almost completely finished except adding in the websocket data. I had a lot of fun doing this all and revamping my website.
 
 ## 🚀 Service deliverable
 
