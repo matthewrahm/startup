@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
 import "../components/css/Login.css";
@@ -9,7 +9,14 @@ function Login() {
     password: ''
   });
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, login, loading } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !loading) {
+      navigate('/home');
+    }
+  }, [user, loading, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,12 +31,20 @@ function Login() {
     
     // Accept any username/password combination
     login({ username: formData.username });
+    
+    // Navigate after login
     navigate('/home');
   };
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
 
   return (
     <div className="login-container">
       <div className="login-content">
+        
+        
         <div className="login-header">
           <h1>Welcome to Ramen Crypto</h1>
           <p>Enter any username to start tracking crypto</p>

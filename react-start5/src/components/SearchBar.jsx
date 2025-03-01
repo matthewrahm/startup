@@ -1,32 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// Combine all coins data for search
-const allCoins = [
-  // Home page coins
-  { id: 1, name: "POPCAT", page: "home" },
-  { id: 2, name: "CHILLGUY", page: "home" },
-  { id: 3, name: "PEPE", page: "home" },
-  
-  // Trending page coins
-  { id: 'btc', name: 'Bitcoin', symbol: 'BTC', page: "trending" },
-  { id: 'eth', name: 'Ethereum', symbol: 'ETH', page: "trending" },
-  { id: 'sol', name: 'Solana', symbol: 'SOL', page: "trending" },
-  { id: 'ada', name: 'Cardano', symbol: 'ADA', page: "trending" },
-  { id: 'dot', name: 'Polkadot', symbol: 'DOT', page: "trending" },
-  
-  // Additional trending coins
-  { id: 1, name: "WebSocket", page: "trending" },
-  { id: 2, name: "DeFi Token", page: "trending" },
-  { id: 3, name: "GameFi", page: "trending" },
-  { id: 4, name: "NFT Market", page: "trending" },
-  { id: 5, name: "MetaToken", page: "trending" }
-];
+import { searchCoins } from '../services/api';
 
 function SearchBar() {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isActive, setIsActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const searchRef = useRef(null);
 
@@ -42,19 +22,35 @@ function SearchBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchTerm.trim() === '') {
+        setSuggestions([]);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const results = await searchCoins(searchTerm);
+        setSuggestions(results);
+      } catch (error) {
+        console.error('Error fetching search suggestions:', error);
+        setSuggestions([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Debounce search requests
+    const timeoutId = setTimeout(() => {
+      fetchSuggestions();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
   const handleSearch = (value) => {
     setSearchTerm(value);
-    if (value.trim() === '') {
-      setSuggestions([]);
-      return;
-    }
-
-    const searchResults = allCoins.filter(coin => 
-      coin.name.toLowerCase().includes(value.toLowerCase()) ||
-      (coin.symbol && coin.symbol.toLowerCase().includes(value.toLowerCase()))
-    );
-
-    setSuggestions(searchResults);
     setIsActive(true);
   };
 
@@ -76,28 +72,31 @@ function SearchBar() {
           onFocus={() => setIsActive(true)}
         />
       </div>
-      {isActive && suggestions.length > 0 && (
+      {isActive && (
         <div className="search-suggestions">
-          {suggestions.map((coin) => (
-            <div
-              key={`${coin.id}-${coin.page}`}
-              className="suggestion-item"
-              onClick={() => handleSelect(coin)}
-            >
-              <span className="suggestion-name">{coin.name}</span>
-              {coin.symbol && (
-                <span className="suggestion-symbol">{coin.symbol}</span>
-              )}
-              <span className="suggestion-page">{coin.page}</span>
+          {isLoading ? (
+            <div className="suggestion-item">
+              <span>Loading...</span>
             </div>
-          ))}
-        </div>
-      )}
-      {isActive && searchTerm && suggestions.length === 0 && (
-        <div className="search-suggestions">
-          <div className="suggestion-item no-results">
-            No coins found
-          </div>
+          ) : suggestions.length > 0 ? (
+            suggestions.map((coin) => (
+              <div
+                key={`${coin.id}-${coin.page}`}
+                className="suggestion-item"
+                onClick={() => handleSelect(coin)}
+              >
+                <span className="suggestion-name">{coin.name}</span>
+                {coin.symbol && (
+                  <span className="suggestion-symbol">{coin.symbol}</span>
+                )}
+                <span className="suggestion-page">{coin.page}</span>
+              </div>
+            ))
+          ) : searchTerm ? (
+            <div className="suggestion-item no-results">
+              No coins found
+            </div>
+          ) : null}
         </div>
       )}
     </div>

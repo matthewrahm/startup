@@ -9,6 +9,7 @@
   --accent-teal: #14F195;
   --success-color: #1DB954;
   --remove-color: #FF4545;
+  --negative-color: #FF4545;
   --gradient-start: #9945FF;
   --gradient-end: #14F195;
 }
@@ -495,6 +496,32 @@ main {
   color: var(--remove-color);
 }
 
+/* Error container */
+.error-container {
+  width: 80%;
+  max-width: 600px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background-color: var(--bg-secondary);
+  border-radius: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.error-container h2 {
+  color: var(--remove-color);
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.error-container p {
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+}
+
 /* Footer styles */
 footer {
   text-align: center;
@@ -595,6 +622,17 @@ footer a:hover {
   }
 }
 
+/* Positive/Negative values */
+.positive {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.negative {
+  color: var(--negative-color);
+  font-weight: 600;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .coin-stats {
@@ -621,8 +659,7 @@ footer a:hover {
   }
 
   .logo img {
-    height: 32px;
-    width: 32px;
+    height: 32px; width: 32px;
   }
 
   .search-container {

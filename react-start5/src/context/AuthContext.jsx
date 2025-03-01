@@ -4,6 +4,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check if user is logged in on component mount
@@ -14,6 +15,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error loading user from localStorage:", error);
+    } finally {
+      // Set loading to false after checking authentication
+      setLoading(false);
     }
   }, []);
 
@@ -23,17 +27,33 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated: true,
       loginTime: new Date().toISOString()
     };
+    
+    // Update user state
     setUser(userInfo);
-    localStorage.setItem('user', JSON.stringify(userInfo));
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('user', JSON.stringify(userInfo));
+    } catch (error) {
+      console.error("Error saving user to localStorage:", error);
+    }
   };
 
   const logout = () => {
+    // Clear user state
     setUser(null);
-    localStorage.removeItem('user');
+    
+    // Remove from localStorage
+    try {
+      localStorage.removeItem('user');
+    } catch (error) {
+      console.error("Error removing user from localStorage:", error);
+    }
   };
 
+  // Provide auth context values
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

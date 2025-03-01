@@ -1,284 +1,349 @@
 /* Trending Page Styles */
 .trending-page {
-    width: 100%;
-    min-height: 100vh;
-    padding: 1rem;
-  }
-  
-  /* Top Coins Section */
-  .trending-page .top-coins-section {
-    width: 100%;
-    max-width: 1400px;
-    margin: 2rem auto;
-    padding: 0 1.5rem;
-  }
-  
-  .trending-page .section-title {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-    color: var(--text-primary);
-    text-align: left;
-    font-weight: 600;
-  }
-  
+  width: 100%;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+/* Exchange Rate Section */
+.trending-page .exchange-rate-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.trending-page .exchange-rate-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.trending-page .exchange-rate-card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1.25rem;
+  min-width: 200px;
+  flex: 1;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.trending-page .exchange-rate-title {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.trending-page .exchange-rate-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Top Coins Section */
+.trending-page .top-coins-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.trending-page .section-title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+  text-align: left;
+  font-weight: 600;
+}
+
+.trending-page .top-coins-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.trending-page .top-coin-card {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.trending-page .coin-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trending-page .coin-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.trending-page .coin-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.trending-page .coin-title h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trending-page .coin-symbol {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.trending-page .coin-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.trending-page .stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trending-page .stat-row:last-child {
+  border-bottom: none;
+}
+
+.trending-page .stat-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.trending-page .stat-value {
+  font-weight: 500;
+}
+
+.trending-page .positive {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.trending-page .negative {
+  color: var(--negative-color);
+  font-weight: 600;
+}
+
+/* Table Styles */
+.trending-page .table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  margin-top: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.trending-page table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.trending-page th {
+  background: var(--bg-primary);
+  padding: 1rem 1.5rem;
+  text-align: left;
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+}
+
+.trending-page td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+  font-size: 0.9375rem;
+}
+
+.trending-page tr:last-child td {
+  border-bottom: none;
+}
+
+.trending-page tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.trending-page .coin-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.trending-page .coin-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Button Styles */
+.trending-page .watchlist-btn {
+  background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+  color: var(--text-primary);
+  border: none;
+  padding: 0.875rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  width: 100%;
+  font-size: 0.9375rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.trending-page .watchlist-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.trending-page .watchlist-btn-small {
+  background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+  color: var(--text-primary);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  min-width: 80px;
+}
+
+.trending-page .watchlist-btn-small:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Notification Styles */
+.trending-page .watchlist-action {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+}
+
+.trending-page .notification-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  animation: fadeInUp 0.3s ease forwards, fadeOut 0.3s ease 2.7s forwards;
+  width: 100%;
+  justify-content: center;
+}
+
+.trending-page .notification-inline.success {
+  background: rgba(29, 185, 84, 0.1);
+  color: var(--success-color);
+}
+
+.trending-page .notification-inline.remove {
+  background: rgba(255, 69, 69, 0.1);
+  color: var(--remove-color);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
   .trending-page .top-coins-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
   
+  .trending-page .exchange-rate-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .trending-page .top-coins-section,
+  .trending-page .exchange-rate-section {
+    padding: 0 1rem;
+  }
+
+  .trending-page .section-title {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
   .trending-page .top-coin-card {
-    background: var(--bg-secondary);
-    border-radius: 16px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    min-width: 0;
+    padding: 1.25rem;
   }
-  
-  .trending-page .coin-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .trending-page .coin-logo {
-    width: 42px;
-    height: 42px;
-    object-fit: contain;
-    flex-shrink: 0;
-  }
-  
-  .trending-page .coin-title {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    min-width: 0;
-  }
-  
-  .trending-page .coin-title h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .trending-page .coin-symbol {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
-  
-  .trending-page .coin-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .trending-page .stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .trending-page .stat-row:last-child {
-    border-bottom: none;
-  }
-  
-  .trending-page .stat-label {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-  }
-  
-  .trending-page .stat-value {
-    font-weight: 500;
-  }
-  
-  .trending-page .positive {
-    color: var(--accent-green);
-    font-weight: 600;
-  }
-  
-  /* Table Styles */
-  .trending-page .table-container {
-    width: 100%;
-    overflow-x: auto;
-    background: var(--bg-secondary);
-    border-radius: 16px;
-    margin-top: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .trending-page table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-  }
-  
-  .trending-page th {
-    background: var(--bg-primary);
-    padding: 1rem 1.5rem;
-    text-align: left;
-    color: var(--text-secondary);
-    font-weight: 600;
-    white-space: nowrap;
-    font-size: 0.875rem;
-    letter-spacing: 0.5px;
-  }
-  
+
+  .trending-page th,
   .trending-page td {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    white-space: nowrap;
-    font-size: 0.9375rem;
-  }
-  
-  .trending-page tr:last-child td {
-    border-bottom: none;
-  }
-  
-  .trending-page tr:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  .trending-page .coin-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .trending-page .coin-icon {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-  }
-  
-  /* Button Styles */
-  .trending-page .watchlist-btn {
-    background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
-    color: var(--text-primary);
-    border: none;
-    padding: 0.875rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    width: 100%;
-    font-size: 0.9375rem;
-    text-align: center;
-    margin-top: 0.5rem;
-  }
-  
-  .trending-page .watchlist-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-  }
-  
-  .trending-page .watchlist-btn-small {
-    background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
-    color: var(--text-primary);
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    padding: 0.875rem 1rem;
     font-size: 0.875rem;
-    min-width: 80px;
+  }
+
+  .trending-page .coin-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .trending-page .coin-title h3 {
+    font-size: 1.125rem;
   }
   
-  .trending-page .watchlist-btn-small:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+  .trending-page .exchange-rate-value {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .trending-page .top-coins-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trending-page .section-title {
+    font-size: 1.5rem;
+  }
+
+  .trending-page .table-container {
+    margin: 1rem -1rem;
+    border-radius: 0;
   }
   
-  /* Notification Styles */
-  .trending-page .watchlist-action {
-    position: relative;
-    display: flex;
+  .trending-page .exchange-rate-container {
     flex-direction: column;
-    align-items: center;
-    gap: 0.625rem;
+  }
+  
+  .trending-page .exchange-rate-card {
     width: 100%;
   }
-  
-  .trending-page .notification-inline {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    animation: fadeInUp 0.3s ease forwards, fadeOut 0.3s ease 2.7s forwards;
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .trending-page .notification-inline.success {
-    background: rgba(29, 185, 84, 0.1);
-    color: var(--success-color);
-  }
-  
-  .trending-page .notification-inline.remove {
-    background: rgba(255, 69, 69, 0.1);
-    color: var(--remove-color);
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 1200px) {
-    .trending-page .top-coins-grid {
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .trending-page .top-coins-section {
-      padding: 0 1rem;
-    }
-  
-    .trending-page .section-title {
-      font-size: 1.75rem;
-      margin-bottom: 1.5rem;
-    }
-  
-    .trending-page .top-coin-card {
-      padding: 1.25rem;
-    }
-  
-    .trending-page th,
-    .trending-page td {
-      padding: 0.875rem 1rem;
-      font-size: 0.875rem;
-    }
-  
-    .trending-page .coin-logo {
-      width: 36px;
-      height: 36px;
-    }
-  
-    .trending-page .coin-title h3 {
-      font-size: 1.125rem;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .trending-page .top-coins-grid {
-      grid-template-columns: 1fr;
-    }
-  
-    .trending-page .section-title {
-      font-size: 1.5rem;
-    }
-  
-    .trending-page .table-container {
-      margin: 1rem -1rem;
-      border-radius: 0;
-    }
-  }
+}

@@ -8,10 +8,19 @@ import Trending from './src/pages/Trending';
 import Watchlist from './src/pages/Watchlist';
 
 const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  
+  // Show loading indicator while checking authentication
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+  
+  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/" replace />;
   }
+  
+  // Render children if authenticated
   return children;
 };
 
