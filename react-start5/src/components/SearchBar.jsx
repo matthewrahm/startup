@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchCoins } from '../services/api';
+import FadeInImage from './FadeInImage';
 
 function SearchBar() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,7 +59,9 @@ function SearchBar() {
     setSearchTerm('');
     setSuggestions([]);
     setIsActive(false);
-    navigate(`/${coin.page}`);
+    
+    // Navigate to coin details page
+    navigate(`/coin/${coin.id}`);
   };
 
   return (
@@ -81,15 +84,20 @@ function SearchBar() {
           ) : suggestions.length > 0 ? (
             suggestions.map((coin) => (
               <div
-                key={`${coin.id}-${coin.page}`}
+                key={`${coin.id}`}
                 className="suggestion-item"
                 onClick={() => handleSelect(coin)}
               >
+                <FadeInImage 
+                  src={coin.image} 
+                  alt={coin.name} 
+                  className="suggestion-image" 
+                  style={{ width: '24px', height: '24px', borderRadius: '50%' }}
+                />
                 <span className="suggestion-name">{coin.name}</span>
                 {coin.symbol && (
                   <span className="suggestion-symbol">{coin.symbol}</span>
                 )}
-                <span className="suggestion-page">{coin.page}</span>
               </div>
             ))
           ) : searchTerm ? (

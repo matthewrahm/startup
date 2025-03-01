@@ -6,6 +6,7 @@ import Login from './src/pages/Login';
 import Home from './src/pages/Home';
 import Trending from './src/pages/Trending';
 import Watchlist from './src/pages/Watchlist';
+import CoinDetails from './src/pages/CoinDetails';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -52,6 +53,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Watchlist />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/coin/:id"
+              element={
+                <ProtectedRoute>
+                  <CoinDetails />
                 </ProtectedRoute>
               }
             />

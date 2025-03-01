@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "./Navbar"
 import { useWatchlist } from "../context/WatchlistContext";
 import "../components/css/trending.css";
@@ -171,7 +172,9 @@ function Trending() {
                     className="coin-logo" 
                   />
                   <div className="coin-title">
-                    <h3>{coin.name}</h3>
+                    <Link to={`/coin/${coin.id}`}>
+                      <h3>{coin.name}</h3>
+                    </Link>
                     <span className="coin-symbol">{coin.symbol}</span>
                   </div>
                 </div>
@@ -243,7 +246,9 @@ function Trending() {
                           alt={`${coin.name} Logo`} 
                           className="coin-icon" 
                         />
-                        <span>{coin.name}</span>
+                        <Link to={`/coin/${coin.id}`}>
+                          <span>{coin.name}</span>
+                        </Link>
                       </div>
                     </td>
                     <td>{coin.price}</td>
@@ -267,7 +272,7 @@ function Trending() {
                           <div className={`notification-inline ${notification.type}`}>
                             <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
                               <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                              <path className="checkmark-check" fill="none" d="M14.1 27 .2l7.1 7.2 16.7-16.8"/>
+                              <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
                             </svg>
                             <span>{notification.message}</span>
                           </div>

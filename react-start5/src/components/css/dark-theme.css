@@ -152,10 +152,8 @@ main {
   border-radius: 4px;
 }
 
-.suggestion-page {
-  color: var(--accent-teal);
-  font-size: 0.75rem;
-  text-transform: capitalize;
+.suggestion-image {
+  flex-shrink: 0;
 }
 
 .no-results {
@@ -254,6 +252,16 @@ main {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.coin-detail-header a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.coin-detail-header a:hover {
+  color: var(--accent-teal);
 }
 
 .coin-image {

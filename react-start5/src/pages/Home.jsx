@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import { useAuth } from "../context/AuthContext";
 import { useWatchlist } from "../context/WatchlistContext";
@@ -189,10 +190,12 @@ function Home() {
       <main>
         <div className="coin-info">
           <div className="coin-header">
-            <FadeInImage 
-              src={solanaData?.image || "/solana.png"} 
-              alt="Solana Logo" 
-            />
+            <Link to={`/coin/solana`}>
+              <FadeInImage 
+                src={solanaData?.image || "/solana.png"} 
+                alt="Solana Logo" 
+              />
+            </Link>
           </div>
           <div className="coin-stats">
             <span>SOL/USD: <span id="sol-price">{solanaData?.price || "$98.00"}</span></span>
@@ -217,7 +220,9 @@ function Home() {
                   alt={coin.name} 
                   className="coin-image" 
                 />
-                <h3>{coin.name}</h3>
+                <Link to={`/coin/${coin.id}`}>
+                  <h3>{coin.name}</h3>
+                </Link>
               </div>
               <div className="coin-stats">
                 <p>Price: {coin.price}</p>

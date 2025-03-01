@@ -6,6 +6,7 @@ import "./src/components/css/styles.css";
 import "./src/components/css/dark-theme.css";  
 import "./src/components/css/trending.css";
 import "./src/components/css/image-transitions.css";
+import "./src/components/css/coin-details.css"
 
 // Create root and render app
 const root = ReactDOM.createRoot(document.getElementById('root'));

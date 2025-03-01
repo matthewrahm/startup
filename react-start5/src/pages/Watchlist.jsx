@@ -1,10 +1,10 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import { useAuth } from "../context/AuthContext";
 import { useWatchlist } from "../context/WatchlistContext";
 import "/src/components/css/dark-theme.css"; 
 import FadeInImage from "../components/FadeInImage";
-
 
 function Watchlist() {
   const { user } = useAuth();
@@ -30,7 +30,9 @@ function Watchlist() {
                       alt={coin.name} 
                       className="coin-image" 
                     />
-                    <h3>{coin.name}</h3>
+                    <Link to={`/coin/${coin.id}`}>
+                      <h3>{coin.name}</h3>
+                    </Link>
                   </div>
                   <div className="coin-stats">
                     <p>Price: {coin.price}</p>

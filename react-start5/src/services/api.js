@@ -384,8 +384,7 @@ export const searchCoins = async (query) => {
       id: coin.id,
       name: coin.name,
       symbol: coin.symbol.toUpperCase(),
-      image: coin.large || coin.thumb,
-      page: "trending" // Default to trending page
+      image: coin.large || coin.thumb
     }));
     
     console.log(`Search results for "${query}" from CoinGecko API:`, coins.length);
@@ -394,9 +393,9 @@ export const searchCoins = async (query) => {
     console.error('Error searching coins with CoinGecko API:', error);
     // Return fallback search results
     return [
-      { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', image: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png', page: 'trending' },
-      { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', image: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', page: 'trending' },
-      { id: 'solana', name: 'Solana', symbol: 'SOL', image: 'https://cryptologos.cc/logos/solana-sol-logo.png', page: 'trending' }
+      { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', image: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
+      { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', image: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
+      { id: 'solana', name: 'Solana', symbol: 'SOL', image: 'https://cryptologos.cc/logos/solana-sol-logo.png' }
     ].filter(coin => 
       coin.name.toLowerCase().includes(query.toLowerCase()) || 
       coin.symbol.toLowerCase().includes(query.toLowerCase())
