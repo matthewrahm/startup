@@ -186,43 +186,7 @@
   font-weight: 600;
 }
 
-/* Exchange Rate Section */
-.trending-page .exchange-rate-section {
-  margin-bottom: 3rem;
-  padding: 0 1rem;
-}
 
-.trending-page .exchange-rate-container {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.trending-page .exchange-rate-card {
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  padding: 1.25rem;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.trending-page .exchange-rate-card:hover {
-  transform: translateY(-5px);
-}
-
-.trending-page .exchange-rate-title {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.trending-page .exchange-rate-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
 
 /* Table Styles */
 .trending-page .trending-coins-section {
