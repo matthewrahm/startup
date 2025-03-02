@@ -134,34 +134,12 @@ function Trending() {
     <>
       <Navbar />
       <div className="trending-page">
-        {/* Exchange Rate Info */}
-        {exchangeRates && (
-          <section className="exchange-rate-section">
-            <h2 className="section-title">Current BTC Exchange Rates</h2>
-            <div className="exchange-rate-container">
-              <div className="exchange-rate-card">
-                <p className="exchange-rate-title">BTC/USD</p>
-                <p className="exchange-rate-value">${(1 / parseFloat(exchangeRates.rates.USD)).toLocaleString()}</p>
-              </div>
-              <div className="exchange-rate-card">
-                <p className="exchange-rate-title">BTC/EUR</p>
-                <p className="exchange-rate-value">€{(1 / parseFloat(exchangeRates.rates.EUR)).toLocaleString()}</p>
-              </div>
-              <div className="exchange-rate-card">
-                <p className="exchange-rate-title">BTC/GBP</p>
-                <p className="exchange-rate-value">£{(1 / parseFloat(exchangeRates.rates.GBP)).toLocaleString()}</p>
-              </div>
-              <div className="exchange-rate-card">
-                <p className="exchange-rate-title">BTC/JPY</p>
-                <p className="exchange-rate-value">¥{(1 / parseFloat(exchangeRates.rates.JPY)).toLocaleString()}</p>
-              </div>
-            </div>
-          </section>
-        )}
+      
 
         {/* Top 5 Coins Section */}
         <section className="top-coins-section">
-          <h2 className="section-title">Top 5 Coins</h2>
+          <h1 className="gradient-title">Top 5 Coins</h1>
+          <p className="gradient-subtitle">Dominating Crypto</p>
           <div className="top-coins-grid">
             {topCoins.map((coin) => (
               <div key={coin.id} className="top-coin-card">

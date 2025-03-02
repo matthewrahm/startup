@@ -66,6 +66,11 @@ cryptoApiClient.interceptors.response.use(
 
 // Format price based on value
 const formatPrice = (price) => {
+  if (typeof price !== 'number') {
+    console.warn('Invalid price value:', price);
+    return '0.00';
+  }
+  
   if (price >= 1000) {
     return price.toLocaleString(undefined, { maximumFractionDigits: 0 });
   } else if (price >= 1) {
@@ -157,7 +162,6 @@ export const fetchTopCoins = async () => {
     });
     
     console.log('Top coins data received from CoinGecko:', response.data.length);
-    console.log('Sample data (BTC):', response.data.find(coin => coin.id === 'bitcoin'));
     
     // Transform the data to match our application's expected format
     const formattedCoins = response.data.map(coin => {
@@ -173,20 +177,22 @@ export const fetchTopCoins = async () => {
         volume: `$${(coin.total_volume / 1000000000).toFixed(1)}B`,
         marketCap: `$${(coin.market_cap / 1000000000).toFixed(1)}B`,
         image: coin.image,
-        txns: `${Math.floor(Math.random() * 50 + 5)}K` // Random transaction count as API doesn't provide this
+        txns: `${Math.floor(Math.random() * 50 + 5)}K`, // Random transaction count as API doesn't provide this
+        currentPrice: coin.current_price // Add raw price for reference
       };
     });
     
+    console.log('Sample formatted coin (BTC):', formattedCoins.find(coin => coin.id === 'bitcoin'));
     return formattedCoins;
   } catch (error) {
     console.error('Error fetching top coins from CoinGecko API:', error);
     // Return fallback data if API fails
     return [
-      { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', price: '$45,000', change: '+5.2%', volume: '$28B', marketCap: '$850B', image: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png', txns: '25K' },
-      { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', price: '$2,800', change: '+3.8%', volume: '$15B', marketCap: '$330B', image: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', txns: '18K' },
-      { id: 'ripple', name: 'XRP', symbol: 'XRP', price: '$0.50', change: '+2.1%', volume: '$3B', marketCap: '$25B', image: 'https://cryptologos.cc/logos/xrp-xrp-logo.png', txns: '15K' },
-      { id: 'solana', name: 'Solana', symbol: 'SOL', price: '$98', change: '+7.5%', volume: '$4B', marketCap: '$38B', image: 'https://cryptologos.cc/logos/solana-sol-logo.png', txns: '30K' },
-      { id: 'cardano', name: 'Cardano', symbol: 'ADA', price: '$1.20', change: '+2.9%', volume: '$2B', marketCap: '$40B', image: 'https://cryptologos.cc/logos/cardano-ada-logo.png', txns: '12K' }
+      { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', price: '$45,000', change: '+5.2%', volume: '$28B', marketCap: '$850B', image: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png', txns: '25K', currentPrice: 45000 },
+      { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', price: '$2,800', change: '+3.8%', volume: '$15B', marketCap: '$330B', image: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', txns: '18K', currentPrice: 2800 },
+      { id: 'ripple', name: 'XRP', symbol: 'XRP', price: '$0.50', change: '+2.1%', volume: '$3B', marketCap: '$25B', image: 'https://cryptologos.cc/logos/xrp-xrp-logo.png', txns: '15K', currentPrice: 0.50 },
+      { id: 'solana', name: 'Solana', symbol: 'SOL', price: '$98', change: '+7.5%', volume: '$4B', marketCap: '$38B', image: 'https://cryptologos.cc/logos/solana-sol-logo.png', txns: '30K', currentPrice: 98 },
+      { id: 'cardano', name: 'Cardano', symbol: 'ADA', price: '$1.20', change: '+2.9%', volume: '$2B', marketCap: '$40B', image: 'https://cryptologos.cc/logos/cardano-ada-logo.png', txns: '12K', currentPrice: 1.20 }
     ];
   }
 };
@@ -240,7 +246,8 @@ export const fetchTrendingCoins = async () => {
         liquidity: `$${randomLiquidity}M`,
         marketCap: `$${(coin.market_cap / 1000000).toFixed(1)}M`,
         image: coin.image,
-        change: `${coin.price_change_percentage_24h >= 0 ? '+' : ''}${coin.price_change_percentage_24h.toFixed(1)}%`
+        change: `${coin.price_change_percentage_24h >= 0 ? '+' : ''}${coin.price_change_percentage_24h.toFixed(1)}%`,
+        currentPrice: coin.current_price // Add raw price for reference
       };
     });
     
@@ -249,11 +256,11 @@ export const fetchTrendingCoins = async () => {
     console.error('Error fetching trending coins from CoinGecko API:', error);
     // Return fallback data if API fails
     return [
-      { id: 'dogecoin', name: "Dogecoin", symbol: "DOGE", price: "$0.08", age: "2h", txns: "5K", volume: "$500K", fiveMin: "+2.5%", oneHour: "+5%", twentyFourHr: "+10%", liquidity: "$2M", marketCap: "$10M", image: "https://cryptologos.cc/logos/dogecoin-doge-logo.png", change: "+10%" },
-      { id: 'chainlink', name: "Chainlink", symbol: "LINK", price: "$13.20", age: "4h", txns: "8K", volume: "$800K", fiveMin: "+1.8%", oneHour: "+3%", twentyFourHr: "+8%", liquidity: "$3M", marketCap: "$15M", image: "https://cryptologos.cc/logos/chainlink-link-logo.png", change: "+8%" },
-      { id: 'polygon', name: "Polygon", symbol: "MATIC", price: "$0.75", age: "1h", txns: "3K", volume: "$300K", fiveMin: "+3.2%", oneHour: "+6%", twentyFourHr: "+12%", liquidity: "$1.5M", marketCap: "$8M", image: "https://cryptologos.cc/logos/polygon-matic-logo.png", change: "+12%" },
-      { id: 'avalanche', name: "Avalanche", symbol: "AVAX", price: "$32.50", age: "3h", txns: "10K", volume: "$1M", fiveMin: "+1.5%", oneHour: "+4%", twentyFourHr: "+15%", liquidity: "$5M", marketCap: "$25M", image: "https://cryptologos.cc/logos/avalanche-avax-logo.png", change: "+15%" },
-      { id: 'shiba-inu', name: "Shiba Inu", symbol: "SHIB", price: "$0.00001", age: "5h", txns: "6K", volume: "$600K", fiveMin: "+2.0%", oneHour: "+4.5%", twentyFourHr: "+9%", liquidity: "$2.5M", marketCap: "$12M", image: "https://cryptologos.cc/logos/shiba-inu-shib-logo.png", change: "+9%" }
+      { id: 'dogecoin', name: "Dogecoin", symbol: "DOGE", price: "$0.08", age: "2h", txns: "5K", volume: "$500K", fiveMin: "+2.5%", oneHour: "+5%", twentyFourHr: "+10%", liquidity: "$2M", marketCap: "$10M", image: "https://cryptologos.cc/logos/dogecoin-doge-logo.png", change: "+10%", currentPrice: 0.08 },
+      { id: 'chainlink', name: "Chainlink", symbol: "LINK", price: "$13.20", age: "4h", txns: "8K", volume: "$800K", fiveMin: "+1.8%", oneHour: "+3%", twentyFourHr: "+8%", liquidity: "$3M", marketCap: "$15M", image: "https://cryptologos.cc/logos/chainlink-link-logo.png", change: "+8%", currentPrice: 13.20 },
+      { id: 'polygon', name: "Polygon", symbol: "MATIC", price: "$0.75", age: "1h", txns: "3K", volume: "$300K", fiveMin: "+3.2%", oneHour: "+6%", twentyFourHr: "+12%", liquidity: "$1.5M", marketCap: "$8M", image: "https://cryptologos.cc/logos/polygon-matic-logo.png", change: "+12%", currentPrice: 0.75 },
+      { id: 'avalanche', name: "Avalanche", symbol: "AVAX", price: "$32.50", age: "3h", txns: "10K", volume: "$1M", fiveMin: "+1.5%", oneHour: "+4%", twentyFourHr: "+15%", liquidity: "$5M", marketCap: "$25M", image: "https://cryptologos.cc/logos/avalanche-avax-logo.png", change: "+15%", currentPrice: 32.50 },
+      { id: 'shiba-inu', name: "Shiba Inu", symbol: "SHIB", price: "$0.00001", age: "5h", txns: "6K", volume: "$600K", fiveMin: "+2.0%", oneHour: "+4.5%", twentyFourHr: "+9%", liquidity: "$2.5M", marketCap: "$12M", image: "https://cryptologos.cc/logos/shiba-inu-shib-logo.png", change: "+9%", currentPrice: 0.00001 }
     ];
   }
 };
@@ -301,10 +308,12 @@ export const fetchCoinDetails = async (coinId) => {
       github: coin.links.repos_url.github[0] || null,
       reddit: coin.links.subreddit_url || null,
       twitter: coin.links.twitter_screen_name ? `https://twitter.com/${coin.links.twitter_screen_name}` : null,
-      txns: `${Math.floor(Math.random() * 5000) + 100}K` // Random transaction count as API doesn't provide this
+      txns: `${Math.floor(Math.random() * 5000) + 100}K`, // Random transaction count as API doesn't provide this
+      currentPrice: marketData.current_price.usd // Add raw price for chart
     };
 
     console.log(`Successfully fetched details for ${coinData.name} from CoinGecko API`);
+    console.log(`Formatted price: ${coinData.price}, Raw price: ${coinData.currentPrice}`);
     return coinData;
   } catch (error) {
     console.error(`Error fetching coin ${coinId} from CoinGecko API:`, error);
@@ -320,7 +329,8 @@ export const fetchCoinDetails = async (coinId) => {
         volume: "$1.5B",
         marketCap: "$38B",
         image: "https://cryptologos.cc/logos/solana-sol-logo.png",
-        txns: "2.3M"
+        txns: "2.3M",
+        currentPrice: 98.00
       },
       'bitcoin': {
         id: 'bitcoin',
@@ -331,7 +341,8 @@ export const fetchCoinDetails = async (coinId) => {
         volume: "$28B",
         marketCap: "$850B",
         image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
-        txns: "500K"
+        txns: "500K",
+        currentPrice: 45000.00
       },
       'ethereum': {
         id: 'ethereum',
@@ -342,7 +353,8 @@ export const fetchCoinDetails = async (coinId) => {
         volume: "$15B",
         marketCap: "$330B",
         image: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-        txns: "800K"
+        txns: "800K",
+        currentPrice: 2800.00
       },
       'ripple': {
         id: 'ripple',
@@ -353,7 +365,8 @@ export const fetchCoinDetails = async (coinId) => {
         volume: "$3B",
         marketCap: "$25B",
         image: "https://cryptologos.cc/logos/xrp-xrp-logo.png",
-        txns: "300K"
+        txns: "300K",
+        currentPrice: 0.50
       }
     };
     
@@ -366,8 +379,88 @@ export const fetchCoinDetails = async (coinId) => {
       volume: "$1.5B",
       marketCap: "$10B",
       image: "/solana.png",
-      txns: "15K"
+      txns: "15K",
+      currentPrice: 100.00
     };
+  }
+};
+
+// Fetch market chart data for a coin
+export const fetchCoinMarketChart = async (coinId, days = 7) => {
+  try {
+    console.log(`Fetching market chart data for ${coinId} over ${days} days from CoinGecko API`);
+    
+    const response = await cryptoApiClient.get(`/coins/${coinId}/market_chart`, {
+      params: {
+        vs_currency: 'usd',
+        days: days,
+        interval: days > 30 ? 'daily' : undefined
+      }
+    });
+    
+    console.log(`Market chart data received for ${coinId}:`, response.data.prices.length, 'data points');
+    
+    // Format the data for Chart.js
+    const chartData = {
+      labels: response.data.prices.map(price => new Date(price[0])),
+      prices: response.data.prices.map(price => price[1]),
+      volumes: response.data.total_volumes.map(volume => volume[1])
+    };
+    
+    return chartData;
+  } catch (error) {
+    console.error(`Error fetching market chart data for ${coinId}:`, error);
+    
+    // Generate fallback data
+    const fallbackData = {
+      labels: [],
+      prices: [],
+      volumes: []
+    };
+    
+    // Generate data for the specified number of days
+    const now = new Date();
+    let basePrice = 0;
+    
+    // Set base price based on coin
+    switch (coinId) {
+      case 'bitcoin':
+        basePrice = 45000;
+        break;
+      case 'ethereum':
+        basePrice = 2800;
+        break;
+      case 'solana':
+        basePrice = 98;
+        break;
+      case 'ripple':
+        basePrice = 0.5;
+        break;
+      default:
+        basePrice = 100;
+    }
+    
+    // Generate random price data
+    for (let i = days; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      
+      // Random price fluctuation (±5%)
+      const randomFactor = 0.9 + (Math.random() * 0.2);
+      const price = basePrice * randomFactor;
+      
+      // Random volume
+      const volume = basePrice * 1000000 * (0.5 + Math.random());
+      
+      fallbackData.labels.push(date);
+      fallbackData.prices.push(price);
+      fallbackData.volumes.push(volume);
+      
+      // Update base price for next iteration (slight drift)
+      basePrice = price;
+    }
+    
+    return fallbackData;
   }
 };
 

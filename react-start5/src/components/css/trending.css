@@ -1,71 +1,86 @@
-/* Trending Page Styles */
-.trending-page {
-  width: 100%;
-  min-height: 100vh;
-  padding: 1rem;
-}
-
-/* Exchange Rate Section */
-.trending-page .exchange-rate-section {
-  width: 100%;
-  max-width: 1400px;
-  margin: 2rem auto;
-  padding: 0 1.5rem;
-}
-
-.trending-page .exchange-rate-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.trending-page .exchange-rate-card {
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  padding: 1.25rem;
-  min-width: 200px;
-  flex: 1;
-  text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.trending-page .exchange-rate-title {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-}
-
-.trending-page .exchange-rate-value {
-  font-size: 1.5rem;
-  font-weight: 600;
-  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+/* Styled gradient title for TOP 5 */
+.trending-page .gradient-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 0 0 1.5rem 0;
+  padding: 0;
+  background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  position: relative;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  text-shadow: 0 0 30px rgba(153, 69, 255, 0.3);
+  transition: all 0.5s ease;
+  text-align: center;
+  display: inline-block;
+  width: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Top Coins Section */
 .trending-page .top-coins-section {
+  margin-bottom: 3rem;
+  padding: 2rem 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.trending-page .gradient-title::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 1400px;
-  margin: 2rem auto;
-  padding: 0 1.5rem;
+  height: 100%;
+  background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+  filter: blur(25px);
+  opacity: 0.5;
+  z-index: -1;
+  transform: translateY(5px) scale(0.95);
+  transition: all 0.5s ease;
+  border-radius: 30px;
+}
+
+.trending-page .gradient-title:hover {
+  transform: scale(1.03);
+  text-shadow: 0 0 40px rgba(153, 69, 255, 0.5);
+}
+
+.trending-page .gradient-title:hover::before {
+  opacity: 0.7;
+  transform: translateY(5px) scale(1);
+  filter: blur(30px);
+}
+
+.trending-page .gradient-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-top: -0.5rem;
+  margin-bottom: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .trending-page .section-title {
   font-size: 2rem;
   margin-bottom: 2rem;
-  color: var(--text-primary);
-  text-align: left;
-  font-weight: 600;
+  text-align: center;
 }
 
 .trending-page .top-coins-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 3rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .trending-page .top-coin-card {
@@ -76,6 +91,14 @@
   flex-direction: column;
   gap: 1.25rem;
   min-width: 0;
+  height: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.trending-page .top-coin-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .trending-page .coin-header {
@@ -109,6 +132,16 @@
   text-overflow: ellipsis;
 }
 
+.trending-page .coin-title a {
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.trending-page .coin-title a:hover {
+  color: var(--accent-teal);
+}
+
 .trending-page .coin-symbol {
   color: var(--text-secondary);
   font-size: 0.875rem;
@@ -119,6 +152,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  flex: 1;
 }
 
 .trending-page .stat-row {
@@ -152,7 +186,50 @@
   font-weight: 600;
 }
 
+/* Exchange Rate Section */
+.trending-page .exchange-rate-section {
+  margin-bottom: 3rem;
+  padding: 0 1rem;
+}
+
+.trending-page .exchange-rate-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.trending-page .exchange-rate-card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.trending-page .exchange-rate-card:hover {
+  transform: translateY(-5px);
+}
+
+.trending-page .exchange-rate-title {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.trending-page .exchange-rate-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
 /* Table Styles */
+.trending-page .trending-coins-section {
+  margin-bottom: 3rem;
+  padding: 0 1rem;
+}
+
 .trending-page .table-container {
   width: 100%;
   overflow-x: auto;
@@ -198,6 +275,16 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.trending-page .coin-cell a {
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.trending-page .coin-cell a:hover {
+  color: var(--accent-teal);
 }
 
 .trending-page .coin-icon {
@@ -282,23 +369,37 @@
 /* Responsive Design */
 @media (max-width: 1200px) {
   .trending-page .top-coins-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
   
   .trending-page .exchange-rate-container {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .trending-page .gradient-title {
+    font-size: 3rem;
+  }
 }
 
 @media (max-width: 768px) {
   .trending-page .top-coins-section,
-  .trending-page .exchange-rate-section {
-    padding: 0 1rem;
+  .trending-page .exchange-rate-section,
+  .trending-page .trending-coins-section {
+    padding: 1.5rem 1rem 0;
+    margin-top: 1.5rem;
   }
 
   .trending-page .section-title {
     font-size: 1.75rem;
     margin-bottom: 1.5rem;
+  }
+  
+  .trending-page .gradient-title {
+    font-size: 2.5rem;
+  }
+  
+  .trending-page .gradient-subtitle {
+    font-size: 1rem;
   }
 
   .trending-page .top-coin-card {
@@ -333,6 +434,14 @@
   .trending-page .section-title {
     font-size: 1.5rem;
   }
+  
+  .trending-page .gradient-title {
+    font-size: 2rem;
+  }
+  
+  .trending-page .gradient-subtitle {
+    font-size: 0.875rem;
+  }
 
   .trending-page .table-container {
     margin: 1rem -1rem;
@@ -340,7 +449,7 @@
   }
   
   .trending-page .exchange-rate-container {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
   
   .trending-page .exchange-rate-card {

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from './Navbar';
 import { useWatchlist } from '../context/WatchlistContext';
 import FadeInImage from '../components/FadeInImage';
+import PriceChart from '../components/PriceChart';
 import { fetchCoinDetails } from '../services/api';
 
 function CoinDetails() {
@@ -11,26 +12,51 @@ function CoinDetails() {
   const [coinData, setCoinData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  // Create a memoized fetch function to avoid recreating it on each render
+  const fetchData = useCallback(async (showRefreshing = true) => {
+    if (showRefreshing) {
+      setRefreshing(true);
+    } else {
       setLoading(true);
-      try {
-        console.log(`Fetching details for coin: ${id}`);
-        const data = await fetchCoinDetails(id);
-        console.log(`Coin details received:`, data);
-        setCoinData(data);
-        setError(null);
-      } catch (err) {
-        console.error(`Error fetching coin ${id}:`, err);
-        setError(`Failed to load data for ${id}. Please try again.`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    }
+    
+    try {
+      console.log(`CoinDetails: Fetching live data for coin: ${id}`);
+      const data = await fetchCoinDetails(id);
+      console.log(`CoinDetails: Live data received for ${id}:`, {
+        name: data.name,
+        price: data.price,
+        rawPrice: data.currentPrice
+      });
+      setCoinData(data);
+      setError(null);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error(`CoinDetails: Error fetching live data for ${id}:`, err);
+      setError(`Failed to load live data for ${id}. Please try again.`);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, [id]);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchData(false);
+  }, [fetchData]);
+
+  // Set up auto-refresh interval (every 60 seconds)
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      console.log(`CoinDetails: Auto-refreshing data for ${id}`);
+      fetchData(true);
+    }, 60000); // 60 seconds
+
+    return () => clearInterval(intervalId);
+  }, [fetchData, id]);
 
   const handleAddToWatchlist = () => {
     if (!coinData) return;
@@ -48,25 +74,44 @@ function CoinDetails() {
     addToWatchlist(watchlistCoin);
   };
 
-  if (loading) {
+  const handleRefresh = () => {
+    fetchData(true);
+  };
+
+  const formatLastUpdated = () => {
+    if (!lastUpdated) return '';
+    
+    return lastUpdated.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  if (loading && !refreshing) {
     return (
       <>
         <Navbar />
-        <div className="loading">Loading {id} data...</div>
+        <div className="loading">Loading live data for {id}...</div>
       </>
     );
   }
 
-  if (error) {
+  if (error && !coinData) {
     return (
       <>
         <Navbar />
         <div className="error-container">
           <h2>Error</h2>
           <p>{error}</p>
-          <Link to="/home" className="watchlist-btn">
-            Return to Home
-          </Link>
+          <div className="error-actions">
+            <button onClick={handleRefresh} className="watchlist-btn">
+              Try Again
+            </button>
+            <Link to="/home" className="watchlist-btn secondary">
+              Return to Home
+            </Link>
+          </div>
         </div>
       </>
     );
@@ -79,6 +124,21 @@ function CoinDetails() {
         <div className="container">
           <div className="back-link">
             <Link to="/home">&larr; Back to Home</Link>
+            <div className="refresh-container">
+              {lastUpdated && (
+                <span className="last-updated">
+                  Last updated: {formatLastUpdated()}
+                </span>
+              )}
+              <button 
+                onClick={handleRefresh} 
+                className={`refresh-btn ${refreshing ? 'refreshing' : ''}`}
+                disabled={refreshing}
+              >
+                <span className="refresh-icon">↻</span> 
+                {refreshing ? 'Refreshing...' : 'Refresh Data'}
+              </button>
+            </div>
           </div>
           
           <div className="coin-details-header">
@@ -134,11 +194,7 @@ function CoinDetails() {
           
           <div className="coin-chart-container">
             <h2>Price Chart</h2>
-            <div className="coin-chart-placeholder">
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                Price Chart Coming Soon
-              </div>
-            </div>
+            <PriceChart coinId={id} />
           </div>
           
           <div className="coin-description">

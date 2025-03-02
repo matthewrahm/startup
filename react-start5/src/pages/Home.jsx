@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useWatchlist } from "../context/WatchlistContext";
 import "/src/components/css/dark-theme.css"; 
 import FadeInImage from "../components/FadeInImage";
+import PriceChart from "../components/PriceChart";
 import { fetchCoinDetails, fetchTopCoins } from '../services/api';
 
 function Home() {
@@ -20,7 +21,7 @@ function Home() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        console.log("Fetching Solana data and featured coins from CoinGecko...");
+        console.log("Home: Fetching Solana data and featured coins from CoinGecko...");
         
         // Fetch data in parallel
         const [solana, topCoinsData] = await Promise.all([
@@ -28,9 +29,15 @@ function Home() {
           fetchTopCoins()
         ]);
         
-        console.log("Data received from CoinGecko:", { 
+        console.log("Home: Data received from CoinGecko:", { 
           solana: solana?.name || 'No data', 
           topCoins: topCoinsData ? topCoinsData.length : 'No data'
+        });
+        
+        // Log the raw price data for debugging
+        console.log("Home: Solana price data:", {
+          formattedPrice: solana?.price,
+          rawPrice: solana?.currentPrice
         });
         
         setSolanaData(solana);
@@ -43,14 +50,18 @@ function Home() {
         targetCoins.forEach(targetId => {
           const foundCoin = topCoinsData.find(coin => coin.id === targetId);
           if (foundCoin) {
-            console.log(`Found ${targetId} in top coins:`, foundCoin);
+            console.log(`Home: Found ${targetId} in top coins:`, {
+              name: foundCoin.name,
+              formattedPrice: foundCoin.price,
+              rawPrice: foundCoin.currentPrice
+            });
             selectedCoins.push(foundCoin);
           }
         });
         
         // If we couldn't find all three coins, use fallback data
         if (selectedCoins.length < 3) {
-          console.log("Using fallback data for featured coins");
+          console.log("Home: Using fallback data for featured coins");
           selectedCoins = [
             { 
               id: 'bitcoin', 
@@ -58,7 +69,8 @@ function Home() {
               price: "$45,000", 
               volume: "$28B", 
               txns: "500K", 
-              image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png" 
+              image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
+              currentPrice: 45000
             },
             { 
               id: 'ethereum', 
@@ -66,7 +78,8 @@ function Home() {
               price: "$2,800", 
               volume: "$15B", 
               txns: "800K", 
-              image: "https://cryptologos.cc/logos/ethereum-eth-logo.png" 
+              image: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+              currentPrice: 2800
             },
             { 
               id: 'ripple', 
@@ -74,7 +87,8 @@ function Home() {
               price: "$0.50", 
               volume: "$3B", 
               txns: "300K", 
-              image: "https://cryptologos.cc/logos/xrp-xrp-logo.png" 
+              image: "https://cryptologos.cc/logos/xrp-xrp-logo.png",
+              currentPrice: 0.50
             }
           ];
         }
@@ -82,17 +96,17 @@ function Home() {
         setFeaturedCoins(selectedCoins);
         setError(null);
       } catch (err) {
-        console.error('Error fetching data from CoinGecko:', err);
+        console.error('Home: Error fetching data from CoinGecko:', err);
         setError('Failed to load cryptocurrency data. Please try again.');
         
         // Set fallback data
         setFeaturedCoins([
-          { id: 'bitcoin', name: "Bitcoin", price: "$45,000", volume: "$28B", txns: "500K", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png" },
-          { id: 'ethereum', name: "Ethereum", price: "$2,800", volume: "$15B", txns: "800K", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png" },
-          { id: 'ripple', name: "XRP", price: "$0.50", volume: "$3B", txns: "300K", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png" }
+          { id: 'bitcoin', name: "Bitcoin", price: "$45,000", volume: "$28B", txns: "500K", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", currentPrice: 45000 },
+          { id: 'ethereum', name: "Ethereum", price: "$2,800", volume: "$15B", txns: "800K", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", currentPrice: 2800 },
+          { id: 'ripple', name: "XRP", price: "$0.50", volume: "$3B", txns: "300K", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", currentPrice: 0.50 }
         ]);
       } finally {
-        console.log("Setting loading to false");
+        console.log("Home: Setting loading to false");
         setLoading(false);
       }
     };
@@ -127,6 +141,11 @@ function Home() {
         fetchTopCoins()
       ]);
       
+      console.log("Home: Retry - Solana price data:", {
+        formattedPrice: solana?.price,
+        rawPrice: solana?.currentPrice
+      });
+      
       setSolanaData(solana);
       
       // Filter for Bitcoin, Ethereum, and XRP
@@ -137,6 +156,11 @@ function Home() {
       targetCoins.forEach(targetId => {
         const foundCoin = topCoinsData.find(coin => coin.id === targetId);
         if (foundCoin) {
+          console.log(`Home: Retry - Found ${targetId} in top coins:`, {
+            name: foundCoin.name,
+            formattedPrice: foundCoin.price,
+            rawPrice: foundCoin.currentPrice
+          });
           selectedCoins.push(foundCoin);
         }
       });
@@ -144,16 +168,16 @@ function Home() {
       // If we couldn't find all three coins, use fallback data
       if (selectedCoins.length < 3) {
         selectedCoins = [
-          { id: 'bitcoin', name: "Bitcoin", price: "$45,000", volume: "$28B", txns: "500K", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png" },
-          { id: 'ethereum', name: "Ethereum", price: "$2,800", volume: "$15B", txns: "800K", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png" },
-          { id: 'ripple', name: "XRP", price: "$0.50", volume: "$3B", txns: "300K", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png" }
+          { id: 'bitcoin', name: "Bitcoin", price: "$45,000", volume: "$28B", txns: "500K", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", currentPrice: 45000 },
+          { id: 'ethereum', name: "Ethereum", price: "$2,800", volume: "$15B", txns: "800K", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", currentPrice: 2800 },
+          { id: 'ripple', name: "XRP", price: "$0.50", volume: "$3B", txns: "300K", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", currentPrice: 0.50 }
         ];
       }
       
       setFeaturedCoins(selectedCoins);
       setError(null);
     } catch (err) {
-      console.error('Error retrying data fetch from CoinGecko:', err);
+      console.error('Home: Error retrying data fetch from CoinGecko:', err);
       setError('Failed to load cryptocurrency data. Please try again.');
     } finally {
       setLoading(false);
@@ -191,10 +215,8 @@ function Home() {
         <div className="coin-info">
           <div className="coin-header">
             <Link to={`/coin/solana`}>
-              <FadeInImage 
-                src={solanaData?.image || "/solana.png"} 
-                alt="Solana Logo" 
-              />
+              <h1 className="solana-title">Solana</h1>
+              <p className="solana-subtitle">$SOL</p>
             </Link>
           </div>
           <div className="coin-stats">
@@ -203,11 +225,7 @@ function Home() {
             <span>24h TXNS: <span id="txns">{solanaData?.txns || "2.3M"}</span></span>
           </div>
           <div className="coin-chart">
-            <div className="chart-container" style={{ width: '100%', height: '300px', background: 'var(--bg-secondary)', borderRadius: '8px', padding: '16px' }}>
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                Price Chart Coming Soon
-              </div>
-            </div>
+            <PriceChart coinId="solana" />
           </div>
         </div>
 
