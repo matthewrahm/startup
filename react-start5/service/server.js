@@ -16,16 +16,37 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Set up Coinbase API client
-const COINBASE_API_URL = 'https://api.coinbase.com/v2';
-const coinbaseAPI = axios.create({
-  baseURL: COINBASE_API_URL,
+// Create axios instance for CoinGecko API
+const cryptoApiClient = axios.create({
+  baseURL: 'https://api.coingecko.com/api/v3',
+  timeout: 15000,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
-  },
-  timeout: 15000 // 15 second timeout
+  }
 });
+
+// Add response interceptor for CoinGecko API
+cryptoApiClient.interceptors.response.use(
+  response => {
+    console.log('CoinGecko API Response:', response.config.url, 'Status:', response.status);
+    return response;
+  },
+  async error => {
+    console.error('CoinGecko API Error:', error.message);
+    
+    if (error.response && error.response.status === 429) {
+      console.error('Rate limit exceeded for CoinGecko API');
+    }
+    
+    if (error.response) {
+      console.error('Status:', error.response.status);
+      console.error('Data:', error.response.data);
+    }
+    
+    return Promise.reject(error);
+  }
+);
 
 // API Routes
 const apiRouter = express.Router();
@@ -35,24 +56,16 @@ apiRouter.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Get exchange rates from Coinbase
+// Get exchange rates
 apiRouter.get('/exchange-rates', async (req, res) => {
   try {
     const currency = req.query.currency || 'USD';
-    console.log(`Fetching exchange rates from Coinbase for ${currency}...`);
+    console.log(`Fetching exchange rates for ${currency} from CoinGecko...`);
     
-    const response = await coinbaseAPI.get('/exchange-rates', {
-      params: { currency }
-    });
-    
-    console.log(`Successfully fetched exchange rates for ${currency}`);
-    res.json(response.data);
+    const exchangeRates = await api.fetchExchangeRates(currency);
+    res.json(exchangeRates);
   } catch (error) {
     console.error('Error fetching exchange rates:', error.message);
-    if (error.response) {
-      console.error('Response status:', error.response.status);
-      console.error('Response data:', error.response.data);
-    }
     
     // Return a more detailed error message
     res.status(500).json({ 
@@ -63,57 +76,15 @@ apiRouter.get('/exchange-rates', async (req, res) => {
   }
 });
 
-// Get top coins using Coinbase exchange rates
+// Get top coins
 apiRouter.get('/coins/top', async (req, res) => {
   try {
-    console.log('Fetching top coins from Coinbase...');
+    console.log('Fetching top coins from CoinGecko...');
     
-    // Get exchange rates for USD (this will give us rates for all currencies against USD)
-    const usdRatesResponse = await coinbaseAPI.get('/exchange-rates', {
-      params: { currency: 'USD' }
-    });
-    
-    const rates = usdRatesResponse.data.data.rates;
-    
-    // Top coins to display - using real cryptocurrency symbols
-    const topCoinSymbols = ['BTC', 'ETH', 'SOL', 'ADA', 'DOT'];
-    
-    // Generate top coins data
-    const topCoins = topCoinSymbols.map(symbol => {
-      // Calculate USD price (1/rate gives us the USD value of 1 unit of the currency)
-      const rate = rates[symbol];
-      const price = rate ? (1 / parseFloat(rate)) : null;
-      
-      // Generate random change percentages (since Coinbase doesn't provide this directly)
-      const isPositive = Math.random() > 0.3; // 70% chance of positive change
-      const changeValue = (Math.random() * 8 + 0.5).toFixed(2);
-      const change = isPositive ? `+${changeValue}%` : `-${changeValue}%`;
-      
-      // Generate random volume and market cap
-      const volumeInBillions = (Math.random() * 30 + 1).toFixed(1);
-      const marketCapInBillions = (Math.random() * 850 + 10).toFixed(1);
-      
-      return {
-        id: getCoinId(symbol),
-        name: getCoinName(symbol),
-        symbol: symbol,
-        price: price ? `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : `$${getDefaultPrice(symbol)}`,
-        change: change,
-        volume: `$${volumeInBillions}B`,
-        marketCap: `$${marketCapInBillions}B`,
-        image: getCoinImage(symbol),
-        txns: `${Math.floor(Math.random() * 50 + 5)}K` // Add transaction count for home page
-      };
-    });
-
-    console.log(`Successfully created ${topCoins.length} top coins`);
+    const topCoins = await api.fetchTopCoins();
     res.json(topCoins);
   } catch (error) {
     console.error('Error fetching top coins:', error.message);
-    if (error.response) {
-      console.error('Response status:', error.response.status);
-      console.error('Response data:', error.response.data);
-    }
     
     // Return fallback data on error
     const fallbackCoins = [
@@ -128,53 +99,15 @@ apiRouter.get('/coins/top', async (req, res) => {
   }
 });
 
-// Get trending coins using Coinbase exchange rates
+// Get trending coins
 apiRouter.get('/coins/trending', async (req, res) => {
   try {
-    console.log('Fetching trending coins using Coinbase data...');
+    console.log('Fetching trending coins from CoinGecko...');
     
-    // Get USD exchange rates
-    const usdRatesResponse = await coinbaseAPI.get('/exchange-rates', {
-      params: { currency: 'USD' }
-    });
-    
-    const rates = usdRatesResponse.data.data.rates;
-    
-    // Select some trending cryptocurrencies (these would normally be determined by popularity)
-    const trendingSymbols = ['DOGE', 'LINK', 'MATIC', 'AVAX', 'SHIB'];
-    
-    const trendingCoins = trendingSymbols.map((symbol, index) => {
-      // Calculate price from USD exchange rate (inverted)
-      const rate = rates[symbol];
-      const price = rate ? `$${(1 / parseFloat(rate)).toFixed(4)}` : `$${(Math.random() * 10).toFixed(2)}`;
-      
-      // Generate random data for fields not provided by Coinbase
-      return {
-        id: getCoinId(symbol),
-        name: getCoinName(symbol),
-        symbol: symbol,
-        price: price,
-        age: `${Math.floor(Math.random() * 12) + 1}h`,
-        txns: `${Math.floor(Math.random() * 20) + 1}K`,
-        volume: `$${(Math.random() * 2 + 0.1).toFixed(1)}M`,
-        fiveMin: `+${(Math.random() * 5).toFixed(1)}%`,
-        oneHour: `+${(Math.random() * 8).toFixed(1)}%`,
-        twentyFourHr: `+${(Math.random() * 15).toFixed(1)}%`,
-        liquidity: `$${(Math.random() * 5 + 1).toFixed(1)}M`,
-        marketCap: `$${(Math.random() * 30 + 5).toFixed(1)}M`,
-        image: getCoinImage(symbol),
-        change: `+${(Math.random() * 15).toFixed(1)}%` // Add change for consistency with top coins
-      };
-    });
-
-    console.log(`Successfully created ${trendingCoins.length} trending coins`);
+    const trendingCoins = await api.fetchTrendingCoins();
     res.json(trendingCoins);
   } catch (error) {
     console.error('Error fetching trending coins:', error.message);
-    if (error.response) {
-      console.error('Response status:', error.response.status);
-      console.error('Response data:', error.response.data);
-    }
     
     // Return fallback data on error
     const fallbackTrending = [
@@ -189,60 +122,16 @@ apiRouter.get('/coins/trending', async (req, res) => {
   }
 });
 
-// Get coin details using Coinbase exchange rates
+// Get coin details
 apiRouter.get('/coins/:id', async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`Fetching details for coin: ${id}`);
     
-    // Map ID to symbol
-    const symbol = getSymbolFromId(id);
-    
-    if (!symbol) {
-      throw new Error(`Unknown coin ID: ${id}`);
-    }
-    
-    // Get USD exchange rates
-    const usdRatesResponse = await coinbaseAPI.get('/exchange-rates', {
-      params: { currency: 'USD' }
-    });
-    
-    // Get rate for the coin
-    const rate = usdRatesResponse.data.data.rates[symbol];
-    
-    if (!rate) {
-      throw new Error(`No exchange rate found for ${symbol}`);
-    }
-    
-    // Calculate price (1/rate gives us the USD value of 1 unit of the currency)
-    const price = 1 / parseFloat(rate);
-    
-    // Create coin data
-    const coinData = {
-      id: id,
-      name: getCoinName(symbol),
-      symbol: symbol,
-      price: `$${price.toLocaleString(undefined, { maximumFractionDigits: symbol === 'BTC' ? 0 : 2 })}`,
-      change24h: `${(Math.random() * 10 - 3).toFixed(2)}%`, // Random change
-      volume: `$${(Math.random() * 30 + 1).toFixed(1)}B`,
-      marketCap: `$${(Math.random() * 850 + 10).toFixed(1)}B`,
-      image: getCoinImage(symbol),
-      description: `${getCoinName(symbol)} is a cryptocurrency that uses blockchain technology.`,
-      website: getWebsiteFromSymbol(symbol),
-      github: null,
-      reddit: null,
-      twitter: null,
-      txns: `${Math.floor(Math.random() * 50 + 5)}K` // Add transaction count for home page
-    };
-
-    console.log(`Successfully fetched details for ${coinData.name}`);
+    const coinData = await api.fetchCoinDetails(id);
     res.json(coinData);
   } catch (error) {
     console.error(`Error fetching coin ${req.params.id}:`, error.message);
-    if (error.response) {
-      console.error('Response status:', error.response.status);
-      console.error('Response data:', error.response.data);
-    }
     
     // Return fallback data on error
     const fallbackCoin = {
@@ -261,6 +150,59 @@ apiRouter.get('/coins/:id', async (req, res) => {
   }
 });
 
+// Get market chart data
+apiRouter.get('/coins/:id/market_chart', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const days = parseInt(req.query.days || '7', 10);
+    
+    console.log(`Fetching market chart data for ${id} over ${days} days`);
+    
+    const chartData = await api.fetchCoinMarketChart(id, days);
+    res.json(chartData);
+  } catch (error) {
+    console.error(`Error fetching market chart for ${req.params.id}:`, error.message);
+    
+    // Return fallback data
+    const fallbackData = {
+      labels: [],
+      prices: [],
+      volumes: []
+    };
+    
+    // Generate some random data points
+    const now = new Date();
+    const days = parseInt(req.query.days || '7', 10);
+    let basePrice = 100; // Default price
+    
+    // Adjust base price based on coin
+    if (req.params.id === 'bitcoin') basePrice = 45000;
+    else if (req.params.id === 'ethereum') basePrice = 2800;
+    else if (req.params.id === 'solana') basePrice = 98;
+    
+    for (let i = days; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      
+      // Random price fluctuation (±5%)
+      const randomFactor = 0.95 + (Math.random() * 0.1);
+      const price = basePrice * randomFactor;
+      
+      // Random volume
+      const volume = basePrice * 1000000 * (0.5 + Math.random());
+      
+      fallbackData.labels.push(date);
+      fallbackData.prices.push(price);
+      fallbackData.volumes.push(volume);
+      
+      // Update base price for next iteration (slight drift)
+      basePrice = price;
+    }
+    
+    res.json(fallbackData);
+  }
+});
+
 // Search coins
 apiRouter.get('/search', async (req, res) => {
   try {
@@ -271,31 +213,7 @@ apiRouter.get('/search', async (req, res) => {
 
     console.log(`Searching for coins with query: ${query}`);
     
-    // For simplicity, we'll use a predefined list of coins
-    const predefinedCoins = [
-      { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', image: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
-      { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', image: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
-      { id: 'solana', name: 'Solana', symbol: 'SOL', image: 'https://cryptologos.cc/logos/solana-sol-logo.png' },
-      { id: 'cardano', name: 'Cardano', symbol: 'ADA', image: 'https://cryptologos.cc/logos/cardano-ada-logo.png' },
-      { id: 'polkadot', name: 'Polkadot', symbol: 'DOT', image: 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png' },
-      { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', image: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png' },
-      { id: 'chainlink', name: 'Chainlink', symbol: 'LINK', image: 'https://cryptologos.cc/logos/chainlink-link-logo.png' },
-      { id: 'polygon', name: 'Polygon', symbol: 'MATIC', image: 'https://cryptologos.cc/logos/polygon-matic-logo.png' },
-      { id: 'avalanche', name: 'Avalanche', symbol: 'AVAX', image: 'https://cryptologos.cc/logos/avalanche-avax-logo.png' },
-      { id: 'shiba-inu', name: 'Shiba Inu', symbol: 'SHIB', image: 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png' }
-    ];
-    
-    const searchResults = predefinedCoins
-      .filter(coin => 
-        coin.name.toLowerCase().includes(query.toLowerCase()) || 
-        coin.symbol.toLowerCase().includes(query.toLowerCase())
-      )
-      .map(coin => ({
-        ...coin,
-        page: "trending" // Default to trending page
-      }));
-
-    console.log(`Found ${searchResults.length} results for query: ${query}`);
+    const searchResults = await api.searchCoins(query);
     res.json(searchResults);
   } catch (error) {
     console.error('Error searching coins:', error.message);
@@ -314,108 +232,66 @@ apiRouter.get('/search', async (req, res) => {
   }
 });
 
-// Helper functions
-function getSymbolFromId(id) {
-  const symbolMap = {
-    'bitcoin': 'BTC',
-    'ethereum': 'ETH',
-    'solana': 'SOL',
-    'cardano': 'ADA',
-    'polkadot': 'DOT',
-    'dogecoin': 'DOGE',
-    'chainlink': 'LINK',
-    'polygon': 'MATIC',
-    'avalanche': 'AVAX',
-    'shiba-inu': 'SHIB'
-  };
-  
-  return symbolMap[id] || id.toUpperCase();
-}
+// Solana price endpoint
+apiRouter.get('/solana/price', async (req, res) => {
+  try {
+    console.log('Fetching Solana price data...');
+    
+    const solanaData = await api.fetchSolanaPrice();
+    res.json(solanaData);
+  } catch (error) {
+    console.error('Error fetching Solana price:', error.message);
+    
+    // Return fallback data
+    res.json({
+      price: '$98.00',
+      change24h: '+5.0%',
+      rawPrice: 98.00
+    });
+  }
+});
 
-function getCoinId(symbol) {
-  const idMap = {
-    'BTC': 'bitcoin',
-    'ETH': 'ethereum',
-    'SOL': 'solana',
-    'ADA': 'cardano',
-    'DOT': 'polkadot',
-    'DOGE': 'dogecoin',
-    'LINK': 'chainlink',
-    'MATIC': 'polygon',
-    'AVAX': 'avalanche',
-    'SHIB': 'shiba-inu'
-  };
-  
-  return idMap[symbol] || symbol.toLowerCase();
-}
+// Solana data endpoint
+apiRouter.get('/solana/data', async (req, res) => {
+  try {
+    console.log('Fetching comprehensive Solana data...');
+    
+    const solanaData = await api.fetchSolanaData();
+    res.json(solanaData);
+  } catch (error) {
+    console.error('Error fetching Solana data:', error.message);
+    
+    // Return fallback data
+    res.json({
+      price: '$98.00',
+      change24h: '+5.0%',
+      rawPrice: 98.00,
+      volume: '$1.5B',
+      rawVolume: 1500000000,
+      txns: '2.3M',
+      rawTxns: 2300000
+    });
+  }
+});
 
-function getCoinName(symbol) {
-  const nameMap = {
-    'BTC': 'Bitcoin',
-    'ETH': 'Ethereum',
-    'SOL': 'Solana',
-    'ADA': 'Cardano',
-    'DOT': 'Polkadot',
-    'DOGE': 'Dogecoin',
-    'LINK': 'Chainlink',
-    'MATIC': 'Polygon',
-    'AVAX': 'Avalanche',
-    'SHIB': 'Shiba Inu'
-  };
-  
-  return nameMap[symbol] || symbol;
-}
-
-function getCoinImage(symbol) {
-  const imageMap = {
-    'BTC': 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
-    'ETH': 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-    'SOL': 'https://cryptologos.cc/logos/solana-sol-logo.png',
-    'ADA': 'https://cryptologos.cc/logos/cardano-ada-logo.png',
-    'DOT': 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png',
-    'DOGE': 'https://cryptologos.cc/logos/dogecoin-doge-logo.png',
-    'LINK': 'https://cryptologos.cc/logos/chainlink-link-logo.png',
-    'MATIC': 'https://cryptologos.cc/logos/polygon-matic-logo.png',
-    'AVAX': 'https://cryptologos.cc/logos/avalanche-avax-logo.png',
-    'SHIB': 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png'
-  };
-  
-  return imageMap[symbol] || '/solana.png';
-}
-
-function getDefaultPrice(symbol) {
-  const priceMap = {
-    'BTC': '45,000',
-    'ETH': '2,800',
-    'SOL': '98',
-    'ADA': '1.20',
-    'DOT': '18',
-    'DOGE': '0.08',
-    'LINK': '13.20',
-    'MATIC': '0.75',
-    'AVAX': '32.50',
-    'SHIB': '0.00001'
-  };
-  
-  return priceMap[symbol] || '10.00';
-}
-
-function getWebsiteFromSymbol(symbol) {
-  const websiteMap = {
-    'BTC': 'https://bitcoin.org',
-    'ETH': 'https://ethereum.org',
-    'SOL': 'https://solana.com',
-    'ADA': 'https://cardano.org',
-    'DOT': 'https://polkadot.network',
-    'DOGE': 'https://dogecoin.com',
-    'LINK': 'https://chain.link',
-    'MATIC': 'https://polygon.technology',
-    'AVAX': 'https://avax.network',
-    'SHIB': 'https://shibatoken.com'
-  };
-  
-  return websiteMap[symbol] || '#';
-}
+// Big movers endpoint
+apiRouter.get('/big-movers', async (req, res) => {
+  try {
+    console.log('Fetching big movers...');
+    
+    const bigMovers = await api.fetchBigMovers();
+    res.json(bigMovers);
+  } catch (error) {
+    console.error('Error fetching big movers:', error.message);
+    
+    // Return fallback data
+    res.json([
+      { id: 'solana', name: 'Solana', symbol: 'SOL', price: '$98.00', change: '+15.2%', image: 'https://cryptologos.cc/logos/solana-sol-logo.png', volume: '$4B', txns: '30K' },
+      { id: 'avalanche', name: 'Avalanche', symbol: 'AVAX', price: '$32.50', change: '+12.8%', image: 'https://cryptologos.cc/logos/avalanche-avax-logo.png', volume: '$1.2B', txns: '15K' },
+      { id: 'polygon', name: 'Polygon', symbol: 'MATIC', price: '$0.75', change: '-8.3%', image: 'https://cryptologos.cc/logos/polygon-matic-logo.png', volume: '$0.8B', txns: '12K' }
+    ]);
+  }
+});
 
 // Use API router
 app.use('/api', apiRouter);
