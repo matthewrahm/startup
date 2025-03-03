@@ -6,7 +6,7 @@ const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Import API functions
 const api = require('./api');
@@ -293,24 +293,6 @@ apiRouter.get('/big-movers', async (req, res) => {
   }
 });
 
-// New endpoint: Get a random quote
-apiRouter.get('/quote', async (req, res) => {
-  try {
-    console.log('Fetching random quote...');
-    
-    const quote = await api.fetchRandomQuote();
-    res.json(quote);
-  } catch (error) {
-    console.error('Error fetching random quote:', error.message);
-    
-    // Return fallback quote
-    res.json({
-      content: "The future of money is digital currency.",
-      author: "Bill Gates"
-    });
-  }
-});
-
 // Use API router
 app.use('/api', apiRouter);
 
@@ -323,12 +305,11 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-const server = app.listen(PORT, '0.0.0.0',() => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API available at http://localhost:${PORT}/api`);
   console.log(`Visit http://localhost:${PORT} to view the application`);
 });
-
 
 // Export server for testing or programmatic use
 module.exports = server;
