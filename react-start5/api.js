@@ -1,4 +1,15 @@
 const axios = require('axios');
+const { getFromCache, storeInCache } = require('./apiCache');
+
+// Create axios instance for our backend API
+const apiClient = axios.create({
+  baseURL: '/api',
+  timeout: 15000, // 15 second timeout
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
+});
 
 // Create axios instance for CoinGecko API
 const cryptoApiClient = axios.create({
@@ -9,6 +20,27 @@ const cryptoApiClient = axios.create({
     'Content-Type': 'application/json'
   }
 });
+
+// Add response interceptor for better error handling
+apiClient.interceptors.response.use(
+  response => response,
+  async error => {
+    console.error('API Error:', error.message);
+    
+    // Check if error is due to timeout or network issues
+    if (error.code === 'ECONNABORTED' || !error.response) {
+      console.error('Network error or timeout');
+    }
+    
+    // Log detailed error information if available
+    if (error.response) {
+      console.error('Status:', error.response.status);
+      console.error('Data:', error.response.data);
+    }
+    
+    return Promise.reject(error);
+  }
+);
 
 // Add response interceptor for CoinGecko API
 cryptoApiClient.interceptors.response.use(
@@ -53,17 +85,32 @@ const formatPrice = (price) => {
 };
 
 /**
- * Enhanced API request function without caching
+ * Enhanced API request function with caching
  * @param {Object} client - The axios client to use
  * @param {string} method - HTTP method (get, post, etc.)
  * @param {string} endpoint - API endpoint
  * @param {Object} params - Request parameters
+ * @param {boolean} useCache - Whether to use caching
  * @returns {Promise<Object>} - API response
  */
-const makeRequest = async (client, method, endpoint, params = {}) => {
+const cachedRequest = async (client, method, endpoint, params = {}, useCache = true) => {
+  // Check cache first if enabled
+  if (useCache && method.toLowerCase() === 'get') {
+    const cachedData = getFromCache(endpoint, params);
+    if (cachedData) {
+      return { data: cachedData };
+    }
+  }
+  
   try {
     // Make the actual API request
     const response = await client[method.toLowerCase()](endpoint, { params });
+    
+    // Store successful response in cache if enabled
+    if (useCache && method.toLowerCase() === 'get') {
+      storeInCache(endpoint, params, response.data);
+    }
+    
     return response;
   } catch (error) {
     // If we get a rate limit error, throw a more specific error
@@ -74,17 +121,18 @@ const makeRequest = async (client, method, endpoint, params = {}) => {
   }
 };
 
-// Fetch exchange rates from CoinGecko
+// Fetch exchange rates from our backend or CoinGecko
 exports.fetchExchangeRates = async (currency = 'USD') => {
   try {
     console.log(`Fetching exchange rates for ${currency} from CoinGecko...`);
     
-    // Use CoinGecko's exchange rates endpoint
-    const response = await makeRequest(
+    // Use CoinGecko's exchange rates endpoint with caching
+    const response = await cachedRequest(
       cryptoApiClient, 
       'get', 
       '/exchange_rates', 
-      {}
+      {},
+      true // Use cache
     );
     
     // Transform the data to match our expected format
@@ -163,7 +211,7 @@ exports.fetchSolanaPrice = async () => {
   try {
     console.log('Fetching real-time Solana price from CoinGecko...');
     
-    const response = await makeRequest(
+    const response = await cachedRequest(
       cryptoApiClient,
       'get',
       '/simple/price',
@@ -171,7 +219,8 @@ exports.fetchSolanaPrice = async () => {
         ids: 'solana',
         vs_currencies: 'usd',
         include_24hr_change: true
-      }
+      },
+      true // Use cache
     );
     
     const price = response.data.solana.usd;
@@ -200,8 +249,8 @@ exports.fetchSolanaData = async () => {
   try {
     console.log('Fetching comprehensive Solana data...');
     
-    // Get basic price data
-    const priceResponse = await makeRequest(
+    // Get basic price data with caching
+    const priceResponse = await cachedRequest(
       cryptoApiClient,
       'get',
       '/simple/price',
@@ -211,11 +260,12 @@ exports.fetchSolanaData = async () => {
         include_24hr_change: true,
         include_24hr_vol: true,
         include_market_cap: true
-      }
+      },
+      true // Use cache
     );
     
-    // Get more detailed data
-    const detailsResponse = await makeRequest(
+    // Get more detailed data with caching
+    const detailsResponse = await cachedRequest(
       cryptoApiClient,
       'get',
       '/coins/solana',
@@ -226,7 +276,8 @@ exports.fetchSolanaData = async () => {
         community_data: false,
         developer_data: false,
         sparkline: false
-      }
+      },
+      true // Use cache
     );
     
     const price = priceResponse.data.solana.usd;
@@ -275,7 +326,7 @@ exports.fetchBigMovers = async () => {
   try {
     console.log('Fetching big movers from CoinGecko...');
     
-    const response = await makeRequest(
+    const response = await cachedRequest(
       cryptoApiClient,
       'get',
       '/coins/markets',
@@ -286,7 +337,8 @@ exports.fetchBigMovers = async () => {
         page: 1,
         sparkline: false,
         price_change_percentage: '24h'
-      }
+      },
+      true // Use cache
     );
     
     // Sort by absolute price change percentage to find biggest movers
@@ -327,7 +379,7 @@ exports.fetchTopCoins = async () => {
   try {
     console.log('Fetching top coins from CoinGecko API...');
     
-    const response = await makeRequest(
+    const response = await cachedRequest(
       cryptoApiClient,
       'get',
       '/coins/markets',
@@ -338,7 +390,8 @@ exports.fetchTopCoins = async () => {
         page: 1,
         sparkline: false,
         price_change_percentage: '24h'
-      }
+      },
+      true // Use cache
     );
     
     console.log('Top coins data received from CoinGecko:', response.data.length);
@@ -382,11 +435,12 @@ exports.fetchTrendingCoins = async () => {
   try {
     console.log('Fetching trending coins from CoinGecko API...');
     
-    const response = await makeRequest(
+    const response = await cachedRequest(
       cryptoApiClient,
       'get',
       '/search/trending',
-      {}
+      {},
+      true // Use cache
     );
     
     console.log('Trending coins data received from CoinGecko:', response.data.coins.length);
@@ -394,7 +448,7 @@ exports.fetchTrendingCoins = async () => {
     // Get detailed information for each trending coin
     const trendingIds = response.data.coins.map(coin => coin.item.id).join(',');
     
-    const detailedResponse = await makeRequest(
+    const detailedResponse = await cachedRequest(
       cryptoApiClient,
       'get',
       '/coins/markets',
@@ -406,7 +460,8 @@ exports.fetchTrendingCoins = async () => {
         page: 1,
         sparkline: false,
         price_change_percentage: '24h'
-      }
+      },
+      true // Use cache
     );
     
     console.log('Detailed trending coin data received:', detailedResponse.data.length);
@@ -461,8 +516,8 @@ exports.fetchCoinDetails = async (coinId) => {
   try {
     console.log(`Fetching details for coin: ${coinId} from CoinGecko API`);
     
-    // Get coin details with market data
-    const detailsResponse = await makeRequest(
+    // Get coin details with market data using cache
+    const detailsResponse = await cachedRequest(
       cryptoApiClient,
       'get',
       `/coins/${coinId}`,
@@ -473,7 +528,8 @@ exports.fetchCoinDetails = async (coinId) => {
         community_data: false,
         developer_data: false,
         sparkline: false
-      }
+      },
+      true // Use cache
     );
     
     const coin = detailsResponse.data;
@@ -602,7 +658,7 @@ exports.fetchCoinMarketChart = async (coinId, days = 7) => {
   try {
     console.log(`Fetching market chart data for ${coinId} over ${days} days from CoinGecko API`);
     
-    const response = await makeRequest(
+    const response = await cachedRequest(
       cryptoApiClient,
       'get',
       `/coins/${coinId}/market_chart`,
@@ -610,7 +666,8 @@ exports.fetchCoinMarketChart = async (coinId, days = 7) => {
         vs_currency: 'usd',
         days: days,
         interval: days > 30 ? 'daily' : undefined
-      }
+      },
+      true // Use cache with longer duration for historical data
     );
     
     console.log(`Market chart data received for ${coinId}:`, response.data.prices.length, 'data points');
@@ -684,11 +741,12 @@ exports.searchCoins = async (query) => {
   try {
     console.log(`Searching for coins with query: ${query} using CoinGecko API`);
     
-    const response = await makeRequest(
+    const response = await cachedRequest(
       cryptoApiClient,
       'get',
       '/search',
-      { query }
+      { query },
+      true // Use cache
     );
     
     // Filter and format the results
@@ -712,5 +770,26 @@ exports.searchCoins = async (query) => {
       coin.name.toLowerCase().includes(query.toLowerCase()) || 
       coin.symbol.toLowerCase().includes(query.toLowerCase())
     );
+  }
+};
+
+// New endpoint: Fetch a random quote from an external API
+exports.fetchRandomQuote = async () => {
+  try {
+    console.log('Fetching random quote from external API...');
+    
+    const response = await axios.get('https://api.quotable.io/random');
+    
+    return {
+      content: response.data.content,
+      author: response.data.author
+    };
+  } catch (error) {
+    console.error('Error fetching random quote:', error);
+    // Return fallback quote
+    return {
+      content: "The future of money is digital currency.",
+      author: "Bill Gates"
+    };
   }
 };
