@@ -293,6 +293,24 @@ apiRouter.get('/big-movers', async (req, res) => {
   }
 });
 
+// New endpoint: Get a random quote
+apiRouter.get('/quote', async (req, res) => {
+  try {
+    console.log('Fetching random quote...');
+    
+    const quote = await api.fetchRandomQuote();
+    res.json(quote);
+  } catch (error) {
+    console.error('Error fetching random quote:', error.message);
+    
+    // Return fallback quote
+    res.json({
+      content: "The future of money is digital currency.",
+      author: "Bill Gates"
+    });
+  }
+});
+
 // Use API router
 app.use('/api', apiRouter);
 

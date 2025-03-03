@@ -1,10 +1,3 @@
-/**
- * API Cache Service
- * 
- * This service provides caching functionality for API requests to reduce
- * the number of calls made to external APIs and prevent rate limiting.
- */
-
 // Cache storage - stores data with expiration times
 const cache = new Map();
 
