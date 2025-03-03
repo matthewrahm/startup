@@ -323,11 +323,12 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0',() => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API available at http://localhost:${PORT}/api`);
   console.log(`Visit http://localhost:${PORT} to view the application`);
 });
+
 
 // Export server for testing or programmatic use
 module.exports = server;
