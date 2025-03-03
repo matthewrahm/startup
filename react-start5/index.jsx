@@ -7,13 +7,14 @@ import "./src/components/css/dark-theme.css";
 import "./src/components/css/trending.css";
 import "./src/components/css/image-transitions.css";
 import "./src/components/css/coin-details.css"
+import "./src/components/css/price-ticker.css"
+import "./src/components/css/big-movers.css"
+import "./src/components/css/watchlist-preview.css"
 
 // Create root and render app
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
 );

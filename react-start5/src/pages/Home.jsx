@@ -6,6 +6,10 @@ import { useWatchlist } from "../context/WatchlistContext";
 import "/src/components/css/dark-theme.css"; 
 import FadeInImage from "../components/FadeInImage";
 import PriceChart from "../components/PriceChart";
+import SolanaPriceTicker from "../components/SolanaPriceTicker";
+import WatchlistPreview from "../components/WatchlistPreview";
+import BigMovers from "../components/BigMovers";
+import SolanaDataTicker from "../components/SolanaDataTicker";
 import { fetchCoinDetails, fetchTopCoins } from '../services/api';
 
 function Home() {
@@ -66,29 +70,35 @@ function Home() {
             { 
               id: 'bitcoin', 
               name: "Bitcoin", 
+              symbol: "BTC",
               price: "$45,000", 
               volume: "$28B", 
               txns: "500K", 
               image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
-              currentPrice: 45000
+              currentPrice: 45000,
+              change: "+5.2%"
             },
             { 
               id: 'ethereum', 
               name: "Ethereum", 
+              symbol: "ETH",
               price: "$2,800", 
               volume: "$15B", 
               txns: "800K", 
               image: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-              currentPrice: 2800
+              currentPrice: 2800,
+              change: "+3.8%"
             },
             { 
               id: 'ripple', 
               name: "XRP", 
+              symbol: "XRP",
               price: "$0.50", 
               volume: "$3B", 
               txns: "300K", 
               image: "https://cryptologos.cc/logos/xrp-xrp-logo.png",
-              currentPrice: 0.50
+              currentPrice: 0.50,
+              change: "+2.1%"
             }
           ];
         }
@@ -101,9 +111,9 @@ function Home() {
         
         // Set fallback data
         setFeaturedCoins([
-          { id: 'bitcoin', name: "Bitcoin", price: "$45,000", volume: "$28B", txns: "500K", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", currentPrice: 45000 },
-          { id: 'ethereum', name: "Ethereum", price: "$2,800", volume: "$15B", txns: "800K", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", currentPrice: 2800 },
-          { id: 'ripple', name: "XRP", price: "$0.50", volume: "$3B", txns: "300K", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", currentPrice: 0.50 }
+          { id: 'bitcoin', name: "Bitcoin", symbol: "BTC", price: "$45,000", volume: "$28B", txns: "500K", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", currentPrice: 45000, change: "+5.2%" },
+          { id: 'ethereum', name: "Ethereum", symbol: "ETH", price: "$2,800", volume: "$15B", txns: "800K", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", currentPrice: 2800, change: "+3.8%" },
+          { id: 'ripple', name: "XRP", symbol: "XRP", price: "$0.50", volume: "$3B", txns: "300K", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", currentPrice: 0.50, change: "+2.1%" }
         ]);
       } finally {
         console.log("Home: Setting loading to false");
@@ -168,9 +178,9 @@ function Home() {
       // If we couldn't find all three coins, use fallback data
       if (selectedCoins.length < 3) {
         selectedCoins = [
-          { id: 'bitcoin', name: "Bitcoin", price: "$45,000", volume: "$28B", txns: "500K", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", currentPrice: 45000 },
-          { id: 'ethereum', name: "Ethereum", price: "$2,800", volume: "$15B", txns: "800K", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", currentPrice: 2800 },
-          { id: 'ripple', name: "XRP", price: "$0.50", volume: "$3B", txns: "300K", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", currentPrice: 0.50 }
+          { id: 'bitcoin', name: "Bitcoin", symbol: "BTC", price: "$45,000", volume: "$28B", txns: "500K", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", currentPrice: 45000, change: "+5.2%" },
+          { id: 'ethereum', name: "Ethereum", symbol: "ETH", price: "$2,800", volume: "$15B", txns: "800K", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", currentPrice: 2800, change: "+3.8%" },
+          { id: 'ripple', name: "XRP", symbol: "XRP", price: "$0.50", volume: "$3B", txns: "300K", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", currentPrice: 0.50, change: "+2.1%" }
         ];
       }
       
@@ -216,57 +226,26 @@ function Home() {
           <div className="coin-header">
             <Link to={`/coin/solana`}>
               <h1 className="solana-title">Solana</h1>
-              <p className="solana-subtitle">$SOL</p>
+              <p className="solana-subtitle">The Future of Blockchain</p>
             </Link>
           </div>
           <div className="coin-stats">
-            <span>SOL/USD: <span id="sol-price">{solanaData?.price || "$98.00"}</span></span>
-            <span>24h Volume: <span id="volume">{solanaData?.volume || "$1.5B"}</span></span>
-            <span>24h TXNS: <span id="txns">{solanaData?.txns || "2.3M"}</span></span>
+            <SolanaPriceTicker initialPrice={solanaData?.price || "$98.00"} refreshInterval={10000} />
+            <SolanaDataTicker dataType="volume" initialValue={solanaData?.volume || "$1.5B"} refreshInterval={10000} label="24h Volume:" />
+            <SolanaDataTicker dataType="txns" initialValue={solanaData?.txns || "2.3M"} refreshInterval={10000} label="24h TXNS:" />
           </div>
           <div className="coin-chart">
             <PriceChart coinId="solana" />
           </div>
         </div>
 
-        <section className="coin-details">
-          {featuredCoins.map((coin) => (
-            <div className="coin-detail" key={coin.id}>
-              <div className="coin-detail-header">
-                <FadeInImage 
-                  src={coin.image} 
-                  alt={coin.name} 
-                  className="coin-image" 
-                />
-                <Link to={`/coin/${coin.id}`}>
-                  <h3>{coin.name}</h3>
-                </Link>
-              </div>
-              <div className="coin-stats">
-                <p>Price: {coin.price}</p>
-                <p>Volume: {coin.volume}</p>
-                <p>TXNS: {coin.txns}</p>
-              </div>
-              <div className="watchlist-action">
-                <button
-                  onClick={() => handleAddToWatchlist(coin)}
-                  className="watchlist-btn"
-                >
-                  Add to Watchlist
-                </button>
-                {notification.show && notification.coinId === coin.id && notification.page === 'home' && (
-                  <div className={`notification-inline ${notification.type}`}>
-                    <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                      <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                      <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                    </svg>
-                    <span>{notification.message}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </section>
+        {/* Tabbed Section with Big Movers and Ramen's Favorites */}
+        <BigMovers featuredCoins={featuredCoins} />
+
+        {/* Watchlist Preview Section */}
+        <WatchlistPreview />
+
+        
       </main>
 
       <footer>

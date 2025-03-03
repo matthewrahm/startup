@@ -1,0 +1,169 @@
+/* Solana Price Ticker Styles */
+.solana-price-container,
+.solana-data-container {
+  position: relative;
+  display: inline-block;
+}
+
+.solana-price-ticker,
+.solana-data-ticker {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  min-width: 150px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ticker-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.ticker-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.ticker-price,
+.ticker-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.ticker-arrow {
+  font-size: 1.25rem;
+  font-weight: bold;
+  animation: pulse 1s ease-in-out;
+}
+
+.ticker-arrow.up {
+  color: var(--success-color);
+}
+
+.ticker-arrow.down {
+  color: var(--negative-color);
+}
+
+/* Price change animations */
+.solana-price-ticker.price-up::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(29, 185, 84, 0.15) 0%, rgba(29, 185, 84, 0) 70%);
+  animation: pulse-glow 2s ease-out;
+  z-index: 1;
+}
+
+.solana-price-ticker.price-down::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 69, 69, 0.15) 0%, rgba(255, 69, 69, 0) 70%);
+  animation: pulse-glow 2s ease-out;
+  z-index: 1;
+}
+
+/* Loading animation */
+.solana-price-ticker.loading::after,
+.solana-data-ticker.loading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+  animation: loading-bar 2s infinite;
+  z-index: 1;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-glow {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .solana-price-ticker,
+  .solana-data-ticker {
+    min-width: 120px;
+  }
+  
+  .ticker-price,
+  .ticker-value {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ticker-label {
+    font-size: 0.75rem;
+  }
+  
+  .ticker-price,
+  .ticker-value {
+    font-size: 0.875rem;
+  }
+  
+  .solana-price-container,
+  .solana-data-container {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .solana-price-ticker,
+  .solana-data-ticker {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
