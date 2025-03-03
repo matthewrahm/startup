@@ -16,7 +16,20 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    chunkSizeWarningLimit: 500, // Prevents warnings but doesn't optimize
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react')) return 'react-vendor';
+            if (id.includes('chart.js')) return 'chart-vendor';
+            if (id.includes('axios')) return 'axios-vendor';
+            return 'vendor';
+          }
+        }
+      }
+    }
   },
   resolve: {
     alias: {
