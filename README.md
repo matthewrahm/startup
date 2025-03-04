@@ -98,10 +98,10 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Node.js/Express HTTP service** - I did not complete this part of the deliverable.
-- [ ] **Static middleware for frontend** - I did not complete this part of the deliverable.
-- [ ] **Calls to third party endpoints** - I did not complete this part of the deliverable.
-- [ ] **Backend service endpoints** - I did not complete this part of the deliverable.
+- [ x ] **Node.js/Express HTTP service** - I did complete this part of the deliverable running on port 4000.The Express server listens on port 4000 and provides endpoints for serving the frontend and backend logic.
+- [ x ] **Static middleware for frontend** - I did complete this part of the deliverable adding static middleware for the service.
+- [ x ] **Calls to third party endpoints** - I did complete this part of the deliverable using CoinGecko API to fetch live cryptocurrency dat through using Axios and Fetch to make GET requests from the backend.
+- [ x ] **Backend service endpoints** - I did complete this part of the deliverable making routes fetching live crypto data from CoinGecko.
 - [ ] **Frontend calls service endpoints** - I did not complete this part of the deliverable.
 
 ## 🚀 DB/Login deliverable
