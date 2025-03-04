@@ -6,7 +6,7 @@ const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Import API functions
 const api = require('./api');
@@ -297,11 +297,11 @@ apiRouter.get('/big-movers', async (req, res) => {
 app.use('/api', apiRouter);
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'dist')));
 
 // All other GET requests not handled before will return the React app
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
 // Start server
