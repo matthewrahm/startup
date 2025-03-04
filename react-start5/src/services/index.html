@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ramen Crypto</title>
+  <link rel="icon" type="image/png" href="/solana.png">
+  <style>
+    /* Fallback styles to ensure page is not white while loading */
+    body {
+      background-color: #121212;
+      color: #E0E0E0;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    #root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .initial-loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100%;
+      background-color: #121212;
+      color: #E0E0E0;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="initial-loading">
+      Loading Ramen Crypto...
+    </div>
+  </div>
+  <script type="module" src="index.jsx"></script>
+</body>
+</html>
