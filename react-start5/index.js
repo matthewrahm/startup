@@ -2,4 +2,4 @@
 const server = require('./service/server');
 
 // The server is already listening for connections as it's initialized in server.js
-console.log('Server started via index.js');
+console.log('Server started via index.js on port 4000');

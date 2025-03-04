@@ -1,0 +1,3 @@
+startup.ramencrypto.click {
+    reverse_proxy localhost:4000
+}
