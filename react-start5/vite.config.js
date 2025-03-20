@@ -5,7 +5,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 4000,
-    open: true,
     proxy: {
       '/api': {
         target: 'http://localhost:4000',
@@ -16,7 +15,14 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    // Ensure assets are included in build
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   },
   resolve: {
     alias: {
