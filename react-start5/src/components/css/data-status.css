@@ -1,0 +1,67 @@
+.data-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+  }
+  
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .loading-spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  .status-indicator.loading {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+  }
+  
+  .status-indicator.error {
+    background-color: rgba(255, 69, 69, 0.1);
+    color: var(--negative-color);
+  }
+  
+  .status-indicator.stale {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+  }
+  
+  .status-indicator.success {
+    background-color: rgba(29, 185, 84, 0.1);
+    color: var(--success-color);
+  }
+  
+  .refresh-btn {
+    background: transparent;
+    border: 1px solid currentColor;
+    color: inherit;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+  }
+  
+  .refresh-btn:hover {
+    background-color: currentColor;
+    color: var(--bg-secondary);
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }

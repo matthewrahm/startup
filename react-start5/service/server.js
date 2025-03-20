@@ -3,16 +3,37 @@ const cors = require('cors');
 const path = require('path');
 const morgan = require('morgan');
 const axios = require('axios');
+const { Server } = require('socket.io');
+const http = require('http');
+const { cache, cacheMiddleware, CACHE_DURATIONS } = require('./cache');
+const rateLimiters = require('./rateLimiter');
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: ['http://localhost:4000', 'https://startup.ramencrypto.click'],
+    methods: ['GET', 'POST']
+  }
+});
+
 const PORT = process.env.PORT || 4000;
 
 // Import API functions
 const api = require('./api');
 
+// CORS configuration
+const corsOptions = {
+  origin: ['http://localhost:4000', 'https://startup.ramencrypto.click'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  maxAge: 600
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -37,11 +58,12 @@ cryptoApiClient.interceptors.response.use(
     
     if (error.response && error.response.status === 429) {
       console.error('Rate limit exceeded for CoinGecko API');
-    }
-    
-    if (error.response) {
-      console.error('Status:', error.response.status);
-      console.error('Data:', error.response.data);
+      // Use cached data if available
+      const cachedData = cache.get(error.config.url);
+      if (cachedData) {
+        console.log('Returning cached data due to rate limit');
+        return { data: cachedData };
+      }
     }
     
     return Promise.reject(error);
@@ -51,250 +73,73 @@ cryptoApiClient.interceptors.response.use(
 // API Routes
 const apiRouter = express.Router();
 
+// Apply general rate limiter to all API routes
+apiRouter.use(rateLimiters.api);
+
 // Health check endpoint
 apiRouter.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Get exchange rates
-apiRouter.get('/exchange-rates', async (req, res) => {
+// Price endpoints with stricter rate limiting and shorter cache
+apiRouter.use('/price', rateLimiters.price);
+apiRouter.get('/price/:coin', cacheMiddleware(CACHE_DURATIONS.PRICE), async (req, res) => {
   try {
-    const currency = req.query.currency || 'USD';
-    console.log(`Fetching exchange rates for ${currency} from CoinGecko...`);
-    
-    const exchangeRates = await api.fetchExchangeRates(currency);
-    res.json(exchangeRates);
+    const data = await api.fetchCoinPrice(req.params.coin);
+    res.json(data);
   } catch (error) {
-    console.error('Error fetching exchange rates:', error.message);
-    
-    // Return a more detailed error message
-    res.status(500).json({ 
-      error: 'Failed to fetch exchange rates',
-      message: error.message,
-      details: error.response ? error.response.data : 'No response details available'
-    });
+    res.status(500).json({ error: 'Failed to fetch price data' });
   }
 });
 
-// Get top coins
-apiRouter.get('/coins/top', async (req, res) => {
+// Market data endpoints with standard caching
+apiRouter.get('/market/:coin', cacheMiddleware(CACHE_DURATIONS.MARKET), async (req, res) => {
   try {
-    console.log('Fetching top coins from CoinGecko...');
-    
-    const topCoins = await api.fetchTopCoins();
-    res.json(topCoins);
+    const data = await api.fetchMarketData(req.params.coin);
+    res.json(data);
   } catch (error) {
-    console.error('Error fetching top coins:', error.message);
-    
-    // Return fallback data on error
-    const fallbackCoins = [
-      { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', price: '$45,000', change: '+5.2%', volume: '$28B', marketCap: '$850B', image: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png', txns: '25K' },
-      { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', price: '$2,800', change: '+3.8%', volume: '$15B', marketCap: '$330B', image: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', txns: '18K' },
-      { id: 'solana', name: 'Solana', symbol: 'SOL', price: '$98', change: '+7.5%', volume: '$4B', marketCap: '$38B', image: 'https://cryptologos.cc/logos/solana-sol-logo.png', txns: '30K' },
-      { id: 'cardano', name: 'Cardano', symbol: 'ADA', price: '$1.20', change: '+2.9%', volume: '$2B', marketCap: '$40B', image: 'https://cryptologos.cc/logos/cardano-ada-logo.png', txns: '12K' },
-      { id: 'polkadot', name: 'Polkadot', symbol: 'DOT', price: '$18', change: '+4.1%', volume: '$1.5B', marketCap: '$18B', image: 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png', txns: '8K' }
-    ];
-    console.log('Returning fallback top coins data');
-    res.json(fallbackCoins);
+    res.status(500).json({ error: 'Failed to fetch market data' });
   }
 });
 
-// Get trending coins
-apiRouter.get('/coins/trending', async (req, res) => {
+// Static data endpoints with longer cache duration
+apiRouter.use('/static', rateLimiters.static);
+apiRouter.get('/static/:type', cacheMiddleware(CACHE_DURATIONS.STATIC), async (req, res) => {
   try {
-    console.log('Fetching trending coins from CoinGecko...');
-    
-    const trendingCoins = await api.fetchTrendingCoins();
-    res.json(trendingCoins);
+    const data = await api.fetchStaticData(req.params.type);
+    res.json(data);
   } catch (error) {
-    console.error('Error fetching trending coins:', error.message);
-    
-    // Return fallback data on error
-    const fallbackTrending = [
-      { id: 'dogecoin', name: "Dogecoin", symbol: "DOGE", price: "$0.08", age: "2h", txns: "5K", volume: "$500K", fiveMin: "+2.5%", oneHour: "+5%", twentyFourHr: "+10%", liquidity: "$2M", marketCap: "$10M", image: "https://cryptologos.cc/logos/dogecoin-doge-logo.png", change: "+10%" },
-      { id: 'chainlink', name: "Chainlink", symbol: "LINK", price: "$13.20", age: "4h", txns: "8K", volume: "$800K", fiveMin: "+1.8%", oneHour: "+3%", twentyFourHr: "+8%", liquidity: "$3M", marketCap: "$15M", image: "https://cryptologos.cc/logos/chainlink-link-logo.png", change: "+8%" },
-      { id: 'polygon', name: "Polygon", symbol: "MATIC", price: "$0.75", age: "1h", txns: "3K", volume: "$300K", fiveMin: "+3.2%", oneHour: "+6%", twentyFourHr: "+12%", liquidity: "$1.5M", marketCap: "$8M", image: "https://cryptologos.cc/logos/polygon-matic-logo.png", change: "+12%" },
-      { id: 'avalanche', name: "Avalanche", symbol: "AVAX", price: "$32.50", age: "3h", txns: "10K", volume: "$1M", fiveMin: "+1.5%", oneHour: "+4%", twentyFourHr: "+15%", liquidity: "$5M", marketCap: "$25M", image: "https://cryptologos.cc/logos/avalanche-avax-logo.png", change: "+15%" },
-      { id: 'shiba-inu', name: "Shiba Inu", symbol: "SHIB", price: "$0.00001", age: "5h", txns: "6K", volume: "$600K", fiveMin: "+2.0%", oneHour: "+4.5%", twentyFourHr: "+9%", liquidity: "$2.5M", marketCap: "$12M", image: "https://cryptologos.cc/logos/shiba-inu-shib-logo.png", change: "+9%" }
-    ];
-    console.log('Returning fallback trending coins data');
-    res.json(fallbackTrending);
+    res.status(500).json({ error: 'Failed to fetch static data' });
   }
 });
 
-// Get coin details
-apiRouter.get('/coins/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    console.log(`Fetching details for coin: ${id}`);
-    
-    const coinData = await api.fetchCoinDetails(id);
-    res.json(coinData);
-  } catch (error) {
-    console.error(`Error fetching coin ${req.params.id}:`, error.message);
-    
-    // Return fallback data on error
-    const fallbackCoin = {
-      id: req.params.id,
-      name: req.params.id.charAt(0).toUpperCase() + req.params.id.slice(1),
-      symbol: req.params.id.substring(0, 3).toUpperCase(),
-      price: "$100.00",
-      change24h: "+5.0%",
-      volume: "$1.5B",
-      marketCap: "$10B",
-      image: "/solana.png",
-      txns: "15K"
-    };
-    console.log(`Returning fallback data for ${req.params.id}`);
-    res.json(fallbackCoin);
-  }
-});
+// WebSocket connection handling for real-time updates
+io.on('connection', (socket) => {
+  console.log('Client connected');
 
-// Get market chart data
-apiRouter.get('/coins/:id/market_chart', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const days = parseInt(req.query.days || '7', 10);
+  socket.on('subscribe', async (endpoint) => {
+    console.log(`Client subscribed to ${endpoint}`);
+    socket.join(endpoint);
     
-    console.log(`Fetching market chart data for ${id} over ${days} days`);
-    
-    const chartData = await api.fetchCoinMarketChart(id, days);
-    res.json(chartData);
-  } catch (error) {
-    console.error(`Error fetching market chart for ${req.params.id}:`, error.message);
-    
-    // Return fallback data
-    const fallbackData = {
-      labels: [],
-      prices: [],
-      volumes: []
-    };
-    
-    // Generate some random data points
-    const now = new Date();
-    const days = parseInt(req.query.days || '7', 10);
-    let basePrice = 100; // Default price
-    
-    // Adjust base price based on coin
-    if (req.params.id === 'bitcoin') basePrice = 45000;
-    else if (req.params.id === 'ethereum') basePrice = 2800;
-    else if (req.params.id === 'solana') basePrice = 98;
-    
-    for (let i = days; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      
-      // Random price fluctuation (±5%)
-      const randomFactor = 0.95 + (Math.random() * 0.1);
-      const price = basePrice * randomFactor;
-      
-      // Random volume
-      const volume = basePrice * 1000000 * (0.5 + Math.random());
-      
-      fallbackData.labels.push(date);
-      fallbackData.prices.push(price);
-      fallbackData.volumes.push(volume);
-      
-      // Update base price for next iteration (slight drift)
-      basePrice = price;
+    // Send initial data (use cache if available)
+    try {
+      const cachedData = cache.get(endpoint);
+      if (cachedData) {
+        socket.emit('data', cachedData);
+      } else {
+        const data = await api.fetchDataForEndpoint(endpoint);
+        cache.set(endpoint, data);
+        socket.emit('data', data);
+      }
+    } catch (error) {
+      socket.emit('error', 'Failed to fetch initial data');
     }
-    
-    res.json(fallbackData);
-  }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
 });
-
-// Search coins
-apiRouter.get('/search', async (req, res) => {
-  try {
-    const { query } = req.query;
-    if (!query) {
-      return res.json([]);
-    }
-
-    console.log(`Searching for coins with query: ${query}`);
-    
-    const searchResults = await api.searchCoins(query);
-    res.json(searchResults);
-  } catch (error) {
-    console.error('Error searching coins:', error.message);
-    
-    // Fallback search results
-    const fallbackResults = [
-      { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', image: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png', page: 'trending' },
-      { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', image: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', page: 'trending' },
-      { id: 'solana', name: 'Solana', symbol: 'SOL', image: 'https://cryptologos.cc/logos/solana-sol-logo.png', page: 'trending' }
-    ].filter(coin => 
-      coin.name.toLowerCase().includes(req.query.query.toLowerCase()) || 
-      coin.symbol.toLowerCase().includes(req.query.query.toLowerCase())
-    );
-    
-    res.json(fallbackResults);
-  }
-});
-
-// Solana price endpoint
-apiRouter.get('/solana/price', async (req, res) => {
-  try {
-    console.log('Fetching Solana price data...');
-    
-    const solanaData = await api.fetchSolanaPrice();
-    res.json(solanaData);
-  } catch (error) {
-    console.error('Error fetching Solana price:', error.message);
-    
-    // Return fallback data
-    res.json({
-      price: '$98.00',
-      change24h: '+5.0%',
-      rawPrice: 98.00
-    });
-  }
-});
-
-// Solana data endpoint
-apiRouter.get('/solana/data', async (req, res) => {
-  try {
-    console.log('Fetching comprehensive Solana data...');
-    
-    const solanaData = await api.fetchSolanaData();
-    res.json(solanaData);
-  } catch (error) {
-    console.error('Error fetching Solana data:', error.message);
-    
-    // Return fallback data
-    res.json({
-      price: '$98.00',
-      change24h: '+5.0%',
-      rawPrice: 98.00,
-      volume: '$1.5B',
-      rawVolume: 1500000000,
-      txns: '2.3M',
-      rawTxns: 2300000
-    });
-  }
-});
-
-// Big movers endpoint
-apiRouter.get('/big-movers', async (req, res) => {
-  try {
-    console.log('Fetching big movers...');
-    
-    const bigMovers = await api.fetchBigMovers();
-    res.json(bigMovers);
-  } catch (error) {
-    console.error('Error fetching big movers:', error.message);
-    
-    // Return fallback data
-    res.json([
-      { id: 'solana', name: 'Solana', symbol: 'SOL', price: '$98.00', change: '+15.2%', image: 'https://cryptologos.cc/logos/solana-sol-logo.png', volume: '$4B', txns: '30K' },
-      { id: 'avalanche', name: 'Avalanche', symbol: 'AVAX', price: '$32.50', change: '+12.8%', image: 'https://cryptologos.cc/logos/avalanche-avax-logo.png', volume: '$1.2B', txns: '15K' },
-      { id: 'polygon', name: 'Polygon', symbol: 'MATIC', price: '$0.75', change: '-8.3%', image: 'https://cryptologos.cc/logos/polygon-matic-logo.png', volume: '$0.8B', txns: '12K' }
-    ]);
-  }
-});
-
-// Use API router
-app.use('/api', apiRouter);
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '..', 'dist')));
@@ -305,11 +150,10 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-const server = app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API available at http://localhost:${PORT}/api`);
-  console.log(`Visit http://localhost:${PORT} to view the application`);
+  console.log(`WebSocket server available at ws://localhost:${PORT}`);
 });
 
-// Export server for testing or programmatic use
 module.exports = server;
