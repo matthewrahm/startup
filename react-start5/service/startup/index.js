@@ -1,5 +1,8 @@
 import server from './server.js';
 import app from './api.js';
 
-// Both servers are already listening for connections
+// Export both servers for PM2
+export { server, app };
+
+// Log startup
 console.log('Main server and API server started');
