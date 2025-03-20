@@ -1,13 +1,24 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const morgan = require('morgan');
-const axios = require('axios');
-const { Server } = require('socket.io');
-const http = require('http');
-const { cache, cacheMiddleware, CACHE_DURATIONS } = require('./cache');
-const rateLimiters = require('./rateLimiter');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import morgan from 'morgan';
+import { Server } from 'socket.io';
+import http from 'http';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import dotenv from 'dotenv';
+import connectDB from '../src/config/db.js';
+import { auth } from '../src/middleware/auth.js';
+import { authService } from '../src/services/authService.js';
+import { watchlistService } from '../src/services/watchlistService.js';
+import { cache, cacheMiddleware, CACHE_DURATIONS } from './cache.js';
+import rateLimiters from './rateLimiter.js';
+
+// ES Module fix for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -20,8 +31,8 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 4000;
 
-// Import API functions
-const api = require('./api');
+// Connect to MongoDB
+connectDB().catch(console.error);
 
 // CORS configuration
 const corsOptions = {
@@ -37,39 +48,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Create axios instance for CoinGecko API
-const cryptoApiClient = axios.create({
-  baseURL: 'https://api.coingecko.com/api/v3',
-  timeout: 15000,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-});
-
-// Add response interceptor for CoinGecko API
-cryptoApiClient.interceptors.response.use(
-  response => {
-    console.log('CoinGecko API Response:', response.config.url, 'Status:', response.status);
-    return response;
-  },
-  async error => {
-    console.error('CoinGecko API Error:', error.message);
-    
-    if (error.response && error.response.status === 429) {
-      console.error('Rate limit exceeded for CoinGecko API');
-      // Use cached data if available
-      const cachedData = cache.get(error.config.url);
-      if (cachedData) {
-        console.log('Returning cached data due to rate limit');
-        return { data: cachedData };
-      }
-    }
-    
-    return Promise.reject(error);
-  }
-);
-
 // API Routes
 const apiRouter = express.Router();
 
@@ -81,11 +59,60 @@ apiRouter.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Auth routes
+apiRouter.post('/auth/register', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const { user, token } = await authService.register(email, password);
+    res.json({ user, token });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+apiRouter.post('/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const { user, token } = await authService.login(email, password);
+    res.json({ user, token });
+  } catch (error) {
+    res.status(401).json({ error: error.message });
+  }
+});
+
+// Watchlist routes (protected by auth middleware)
+apiRouter.get('/watchlist', auth, async (req, res) => {
+  try {
+    const watchlist = await watchlistService.getWatchlist(req.user._id);
+    res.json(watchlist);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+apiRouter.post('/watchlist/add', auth, async (req, res) => {
+  try {
+    const watchlist = await watchlistService.addToWatchlist(req.user._id, req.body.coin);
+    res.json(watchlist);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+apiRouter.delete('/watchlist/:coinId', auth, async (req, res) => {
+  try {
+    const watchlist = await watchlistService.removeFromWatchlist(req.user._id, req.params.coinId);
+    res.json(watchlist);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Price endpoints with stricter rate limiting and shorter cache
 apiRouter.use('/price', rateLimiters.price);
 apiRouter.get('/price/:coin', cacheMiddleware(CACHE_DURATIONS.PRICE), async (req, res) => {
   try {
-    const data = await api.fetchCoinPrice(req.params.coin);
+    const data = await fetchCoinPrice(req.params.coin);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch price data' });
@@ -95,21 +122,10 @@ apiRouter.get('/price/:coin', cacheMiddleware(CACHE_DURATIONS.PRICE), async (req
 // Market data endpoints with standard caching
 apiRouter.get('/market/:coin', cacheMiddleware(CACHE_DURATIONS.MARKET), async (req, res) => {
   try {
-    const data = await api.fetchMarketData(req.params.coin);
+    const data = await fetchMarketData(req.params.coin);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch market data' });
-  }
-});
-
-// Static data endpoints with longer cache duration
-apiRouter.use('/static', rateLimiters.static);
-apiRouter.get('/static/:type', cacheMiddleware(CACHE_DURATIONS.STATIC), async (req, res) => {
-  try {
-    const data = await api.fetchStaticData(req.params.type);
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch static data' });
   }
 });
 
@@ -121,13 +137,12 @@ io.on('connection', (socket) => {
     console.log(`Client subscribed to ${endpoint}`);
     socket.join(endpoint);
     
-    // Send initial data (use cache if available)
     try {
       const cachedData = cache.get(endpoint);
       if (cachedData) {
         socket.emit('data', cachedData);
       } else {
-        const data = await api.fetchDataForEndpoint(endpoint);
+        const data = await fetchDataForEndpoint(endpoint);
         cache.set(endpoint, data);
         socket.emit('data', data);
       }
@@ -140,6 +155,9 @@ io.on('connection', (socket) => {
     console.log('Client disconnected');
   });
 });
+
+// Use API router
+app.use('/api', apiRouter);
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '..', 'dist')));
@@ -156,4 +174,4 @@ server.listen(PORT, () => {
   console.log(`WebSocket server available at ws://localhost:${PORT}`);
 });
 
-module.exports = server;
+export default server;
