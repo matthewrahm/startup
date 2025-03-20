@@ -1,65 +1,51 @@
-#!/bin/bash
-
 while getopts k:h:s: flag
 do
     case "${flag}" in
-        k) key=${OPTARG};;      # SSH key file (e.g., crypto.pem)
-        h) hostname=${OPTARG};; # Server hostname
-        s) service=${OPTARG};;  # Service name (e.g., startup)
+        k) key=${OPTARG};;
+        h) hostname=${OPTARG};;
+        s) service=${OPTARG};;
     esac
 done
 
 if [[ -z "$key" || -z "$hostname" || -z "$service" ]]; then
-    printf "\n❌ Missing required parameter.\n"
-    printf "  Syntax: deployService.sh -k <pem key file> -h <hostname> -s <service>\n\n"
+    printf "\nMissing required parameter.\n"
+    printf "  syntax: deployService.sh -k <pem key file> -h <hostname> -s <service>\n\n"
     exit 1
 fi
 
-printf "\n🚀 Deploying service $service to $hostname using key $key\n"
+printf "\n----> Deploying React bundle $service to $hostname with $key\n"
 
-# Step 1: Build the project
-printf "\n📦 Building the distribution package...\n"
+# Step 1
+printf "\n----> Build the distribution package\n"
 rm -rf build
-mkdir -p build/public
-mkdir -p build/service
+mkdir build
+npm install # make sure vite is installed so that we can bundle
+npm run build # build the React front end
+cp -rf dist build/public # move the React front end to the target distribution
+cp service/*.js build # move the back end service to the target distribution
+cp service/*.json build
 
-npm install --legacy-peer-deps  # Ensure dependencies are installed
-
-npm run build  # Build the frontend
-if [ ! -d "dist" ]; then
-    echo "❌ Build failed: 'dist' folder not found. Exiting..."
-    exit 1
-fi
-
-cp -rf dist/* build/public/  # Move built frontend to correct folder
-
-# Move backend files
-cp -rf service/* build/service/
-
-# Step 2: Prepare the target directory
-printf "\n🧹 Clearing out previous deployment on the server...\n"
+# Step 2
+printf "\n----> Clearing out previous distribution on the target\n"
 ssh -i "$key" ubuntu@$hostname << ENDSSH
 rm -rf services/${service}
-mkdir -p services/${service}/public
-mkdir -p services/${service}/service
+mkdir -p services/${service}
 ENDSSH
 
-# Step 3: Copy the new build to the server
-printf "\n📤 Uploading files to the server...\n"
-scp -r -i "$key" build/public ubuntu@$hostname:services/$service
-scp -r -i "$key" build/service ubuntu@$hostname:services/$service
+# Step 3
+printf "\n----> Copy the distribution package to the target\n"
+scp -r -i "$key" build/* ubuntu@$hostname:services/$service
 
-# Step 4: Install dependencies and restart the service
-printf "\n🚀 Deploying the service on the target...\n"
+# Step 4
+printf "\n----> Deploy the service on the target\n"
 ssh -i "$key" ubuntu@$hostname << ENDSSH
+bash -i
 cd services/${service}
 npm install
-pm2 restart ${service} || pm2 start service/server.js --name ${service} --watch -- --port 4000
+pm2 restart ${service}
 ENDSSH
 
-# Step 5: Clean up local build files
-printf "\n🧹 Cleaning up local build files...\n"
+# Step 5
+printf "\n----> Removing local copy of the distribution package\n"
 rm -rf build
 rm -rf dist
-
-printf "\n✅ Deployment successful! Service running on port 4000.\n"
