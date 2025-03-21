@@ -1,7 +1,7 @@
 export default {
     apps: [{
       name: 'ramen-crypto',
-      script: 'server.js',
+      script: './service/startup/server.js',
       env: {
         NODE_ENV: 'production',
         PORT: 4000

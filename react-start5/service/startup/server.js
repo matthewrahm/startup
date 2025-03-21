@@ -43,7 +43,6 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(morgan('dev'));
 
 // API Routes
 const apiRouter = express.Router();
@@ -111,6 +110,15 @@ app.use(express.static(path.join(__dirname, '..', '..', 'build', 'public')));
 // All other GET requests not handled before will return the React app
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', '..', 'build', 'public', 'index.html'));
+});
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('Client connected');
+  
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
 });
 
 // Start server
