@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import morgan from 'morgan';
 import { Server } from 'socket.io';
 import http from 'http';
 import { fileURLToPath } from 'url';
@@ -107,11 +106,11 @@ apiRouter.delete('/watchlist/:coinId', auth, async (req, res) => {
 app.use('/api', apiRouter);
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, '..', '..', 'dist')));
+app.use(express.static(path.join(__dirname, '..', '..', 'build', 'public')));
 
 // All other GET requests not handled before will return the React app
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', '..', 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', '..', 'build', 'public', 'index.html'));
 });
 
 // Start server

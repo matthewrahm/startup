@@ -2,12 +2,14 @@
   "name": "ramen-crypto",
   "version": "1.0.0",
   "description": "A cryptocurrency tracking application",
+  "main": "service/startup/index.js",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"nodemon service/startup/index.js\" \"vite\"",
+    "start": "node service/startup/index.js",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server.js"
+    "test:integrations": "node src/tests/testIntegrations.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.772.0",
@@ -16,6 +18,7 @@
     "axios": "^1.6.2",
     "bcrypt": "^5.1.1",
     "chart.js": "^4.4.1",
+    "concurrently": "^8.2.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -26,6 +29,7 @@
     "mongoose": "^8.0.1",
     "morgan": "^1.10.0",
     "node-cache": "^5.1.2",
+    "nodemon": "^3.0.1",
     "pm2": "^5.3.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
