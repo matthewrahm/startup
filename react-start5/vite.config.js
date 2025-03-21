@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
@@ -16,17 +17,15 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
-    // Ensure assets are included in build
-    assetsDir: 'assets',
     rollupOptions: {
-      output: {
-        manualChunks: undefined
+      input: {
+        main: path.resolve(__dirname, 'index.html')
       }
     }
   },
   resolve: {
     alias: {
-      '@': '/src'
+      '@': path.resolve(__dirname, './src')
     }
   }
 });
