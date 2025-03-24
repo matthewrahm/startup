@@ -13,7 +13,7 @@ import { authService } from '../src/services/authService.js';
 import { watchlistService } from '../src/services/watchlistService.js';
 import { cache, cacheMiddleware, CACHE_DURATIONS } from './cache.js';
 import rateLimiters from './rateLimiter.js';
-import db from './src/config/db.js'
+
 
 
 // ES Module fix for __dirname
