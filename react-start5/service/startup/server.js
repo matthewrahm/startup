@@ -105,7 +105,7 @@ apiRouter.delete('/watchlist/:coinId', auth, async (req, res) => {
 app.use('/api', apiRouter);
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, '..', '..', 'build', 'public')));
+app.use(express.static(path.join(__dirname, '..', '..', 'public')));
 
 // All other GET requests not handled before will return the React app
 app.get('*', (req, res) => {
