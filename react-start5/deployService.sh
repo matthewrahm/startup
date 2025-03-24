@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Parse command line flags
 while getopts k:h:s: flag
 do
     case "${flag}" in
@@ -9,58 +10,69 @@ do
     esac
 done
 
+# Check for required arguments
 if [[ -z "$key" || -z "$hostname" || -z "$service" ]]; then
-    printf "\nMissing required parameter.\n"
+    printf "\n\033[1;31m❌ Missing required parameter.\033[0m\n"
     printf "  syntax: deployService.sh -k <pem key file> -h <hostname> -s <service>\n\n"
     exit 1
 fi
 
-printf "\n----> Deploying React bundle \033[1m$service\033[0m to \033[1m$hostname\033[0m with \033[1m$key\033[0m\n"
+printf "\n\033[1;36m----> Deploying service '\033[1m$service\033[0m' to '\033[1m$hostname\033[0m' using key '\033[1m$key\033[0m'\033[0m\n"
 
-# Step 1: Build
-printf "\n----> Step 1: Build the distribution package\n"
+### Step 1: Build
+printf "\n\033[1;33m----> Step 1: Build the distribution package\033[0m\n"
 rm -rf build dist
 mkdir -p build
 
-# Install dependencies and build frontend
-npm install
-npm run build
+echo "📦 Installing dependencies..."
+npm install || { echo "❌ npm install failed"; exit 1; }
 
-# Move necessary files to the build directory
-cp -r dist build/public
-cp -r service build/service
-cp -r src build/src
-cp package*.json build
+echo "⚙️ Building frontend..."
+npm run build || { echo "❌ npm run build failed"; exit 1; }
 
-# Step 2: SSH into target and prepare
-printf "\n----> Step 2: Clearing out previous distribution on the target\n"
+if [ ! -d "dist" ]; then
+    echo "❌ Vite build failed — 'dist' folder not found."
+    exit 1
+fi
+
+# Copy frontend build
+mkdir -p build/public
+cp -r dist/* build/public
+
+# Copy backend files
+cp service/*.js build/
+cp service/*.json build/
+cp package*.json build/
+
+### Step 2: Clear old remote service
+printf "\n\033[1;33m----> Step 2: Clearing previous distribution on the target\033[0m\n"
 ssh -i "$key" ubuntu@$hostname << ENDSSH
 rm -rf services/${service}
 mkdir -p services/${service}
 ENDSSH
 
-# Step 3: Copy to server
-printf "\n----> Step 3: Copying distribution package to the target\n"
+### Step 3: Upload to server
+printf "\n\033[1;33m----> Step 3: Copying new build to the target\033[0m\n"
 scp -r -i "$key" build/* ubuntu@$hostname:services/$service
 
-# Step 4: SSH in again and start server
-printf "\n----> Step 4: Installing dependencies and restarting PM2\n"
+### Step 4: Install and restart PM2
+printf "\n\033[1;33m----> Step 4: Installing dependencies and restarting PM2\033[0m\n"
 ssh -i "$key" ubuntu@$hostname << ENDSSH
 cd services/${service}
 npm install
 
-# Stop and delete old PM2 process if running
+# Kill old instance if it exists
 pm2 delete ${service} || true
 
-# Start the backend (adjust this if your entry file is different)
-pm2 start service/startup/server.js --name ${service}
+# Start new one
+pm2 start server.js --name ${service}
 
-# Save PM2 process list
+# Save PM2 config
 pm2 save
 ENDSSH
 
-# Step 5: Clean up
-printf "\n----> Step 5: Cleaning up local build artifacts\n"
+### Step 5: Cleanup
+printf "\n\033[1;33m----> Step 5: Cleanup\033[0m\n"
 rm -rf build dist
 
-printf "\n✅ Deployment of \033[1m$service\033[0m to \033[1m$hostname\033[0m complete.\n"
+printf "\n✅ \033[1;32mDeployment complete:\033[0m http://${hostname}\n\n"
