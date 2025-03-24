@@ -23,17 +23,20 @@ rm -rf build dist
 mkdir -p build
 echo "📦 Installing dependencies..."
 npm install
-
 echo "⚙️ Building frontend..."
 npm run build
 
-# Copy React build to public folder
+# Move frontend build output to public/
 mkdir -p build/public
-cp -r dist/* build/public
+cp -r dist/* build/public/
 
-# Copy backend files — includes startup folder now
-cp -r service/startup build/startup
+# Copy backend files (flattened from service/startup)
+cp service/startup/*.js build/
+cp service/startup/*.json build/
 cp package*.json build/
+
+# Copy src folder (if needed by server.js)
+cp -r src build/
 
 # Step 2: SSH into target and clear out previous deployment
 printf "\n----> Step 2: Clearing out previous distribution on the target\n"
@@ -52,13 +55,13 @@ ssh -i "$key" ubuntu@$hostname << ENDSSH
 cd services/${service}
 npm install
 
-# Kill existing service if running
+# Stop existing PM2 process
 pm2 delete ${service} || true
 
-# Start the new backend service
-pm2 start startup/server.js --name ${service}
+# Start server.js directly
+pm2 start server.js --name ${service}
 
-# Save PM2 state
+# Save PM2 process list
 pm2 save
 ENDSSH
 
