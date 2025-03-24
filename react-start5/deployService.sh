@@ -26,42 +26,34 @@ npm install
 echo "⚙️ Building frontend..."
 npm run build
 
-# Move frontend build output to public/
+# Move frontend build to build/public
 mkdir -p build/public
 cp -r dist/* build/public/
 
-# Copy backend files (flattened from service/startup)
+# Copy backend files from service/startup/
 cp service/startup/*.js build/
 cp service/startup/*.json build/
 cp package*.json build/
-
-# Copy src folder (if needed by server.js)
 cp -r src build/
 
-# Step 2: SSH into target and clear out previous deployment
+# Step 2: SSH into target and prepare folder
 printf "\n----> Step 2: Clearing out previous distribution on the target\n"
 ssh -i "$key" ubuntu@$hostname << ENDSSH
 rm -rf services/${service}
 mkdir -p services/${service}
 ENDSSH
 
-# Step 3: SCP files to target
+# Step 3: Copy to server
 printf "\n----> Step 3: Copying distribution package to the target\n"
 scp -r -i "$key" build/* ubuntu@$hostname:services/$service
 
-# Step 4: Install & restart via PM2
+# Step 4: Install and restart server on remote
 printf "\n----> Step 4: Installing dependencies and restarting PM2\n"
 ssh -i "$key" ubuntu@$hostname << ENDSSH
 cd services/${service}
 npm install
-
-# Stop existing PM2 process
 pm2 delete ${service} || true
-
-# Start server.js directly
 pm2 start server.js --name ${service}
-
-# Save PM2 process list
 pm2 save
 ENDSSH
 
