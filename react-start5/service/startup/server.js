@@ -10,6 +10,7 @@ import connectDB from '../../src/config/db.js';
 import { auth } from '../../src/middleware/auth.js';
 import { authService } from '../../src/services/authService.js';
 import { watchlistService } from '../../src/services/watchlistService.js';
+import db from './src/config/db.js'
 
 // ES Module fix for __dirname
 const __filename = fileURLToPath(import.meta.url);

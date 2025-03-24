@@ -31,6 +31,7 @@ npm run build
 # Copy frontend + backend files
 cp -r dist build/public                       # Frontend output
 cp service/*.js build                         # Backend service files
+cp -r service/startup/src build/src  
 cp service/*.json build                       # Backend JSON configs
 cp -r src build                               # ✅ Ensure src/ is included (config files, etc)
 cp package*.json build                        # npm install needs these
