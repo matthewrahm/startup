@@ -15,28 +15,24 @@ if [[ -z "$key" || -z "$hostname" || -z "$service" ]]; then
     exit 1
 fi
 
-printf "\n----> Deploying service '\033[1m$service\033[0m' to '\033[1m$hostname\033[0m' using key '\033[1m$key\033[0m'\n"
+printf "\n----> Deploying React bundle \033[1m$service\033[0m to \033[1m$hostname\033[0m with \033[1m$key\033[0m\n"
 
 # Step 1: Build
 printf "\n----> Step 1: Build the distribution package\n"
 rm -rf build dist
 mkdir -p build
-echo "📦 Installing dependencies..."
+
+# Install dependencies and build frontend
 npm install
-echo "⚙️ Building frontend..."
 npm run build
 
-# Move frontend build to build/public
-mkdir -p build/public
-cp -r dist/* build/public/
+# Move necessary files to the build directory
+cp -r dist build/public
+cp -r service build/service
+cp -r src build/src
+cp package*.json build
 
-# Copy backend files from service/startup/
-cp service/startup/*.js build/
-cp service/startup/*.json build/
-cp package*.json build/
-cp -r src build/
-
-# Step 2: SSH into target and prepare folder
+# Step 2: SSH into target and prepare
 printf "\n----> Step 2: Clearing out previous distribution on the target\n"
 ssh -i "$key" ubuntu@$hostname << ENDSSH
 rm -rf services/${service}
@@ -47,13 +43,19 @@ ENDSSH
 printf "\n----> Step 3: Copying distribution package to the target\n"
 scp -r -i "$key" build/* ubuntu@$hostname:services/$service
 
-# Step 4: Install and restart server on remote
+# Step 4: SSH in again and start server
 printf "\n----> Step 4: Installing dependencies and restarting PM2\n"
 ssh -i "$key" ubuntu@$hostname << ENDSSH
 cd services/${service}
 npm install
+
+# Stop and delete old PM2 process if running
 pm2 delete ${service} || true
-pm2 start server.js --name ${service}
+
+# Start the backend (adjust this if your entry file is different)
+pm2 start service/startup/server.js --name ${service}
+
+# Save PM2 process list
 pm2 save
 ENDSSH
 
