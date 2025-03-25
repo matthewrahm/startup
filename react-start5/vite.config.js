@@ -15,7 +15,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: 'build/public',
+    outDir: 'dist',
     sourcemap: true,
     rollupOptions: {
       input: {
