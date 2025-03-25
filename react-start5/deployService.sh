@@ -1,47 +1,54 @@
 #!/bin/bash
 
-while getopts ":k:h:s:" opt; do
-  case $opt in
-    k) KEY="$OPTARG"
-    ;;
-    h) HOST="$OPTARG"
-    ;;
-    s) SERVICE="$OPTARG"
-    ;;
-    \?) echo "Invalid option -$OPTARG" >&2
-    exit 1
-    ;;
-  esac
+while getopts k:h:s: flag
+do
+    case "${flag}" in
+        k) key=${OPTARG};;
+        h) hostname=${OPTARG};;
+        s) service=${OPTARG};;
+    esac
 done
 
-echo ""
-echo "----> Deploying service '$SERVICE' to '$HOST' using key '$KEY'"
-echo ""
-
-#### 1. Build frontend
-echo "----> Step 1: Build the frontend"
-npm install
-npm run build
-
-# Check if build/public/index.html exists
-if [ ! -f "build/public/index.html" ]; then
-  echo "❌ Build failed — build/public/index.html not found. Exiting..."
-  exit 1
+if [[ -z "$key" || -z "$hostname" || -z "$service" ]]; then
+    printf "\nMissing required parameter.\n"
+    printf "  syntax: deployService.sh -k <pem key file> -h <hostname> -s <service>\n\n"
+    exit 1
 fi
 
-#### 2. Upload to server
-echo ""
-echo "----> Step 2: Upload files to server"
-scp -r -i "$KEY" . ubuntu@"$HOST":/home/ubuntu/services/"$SERVICE"/
+printf "\n----> Deploying React bundle $service to $hostname with $key\n"
 
-#### 3. SSH into server and restart PM2
-echo ""
-echo "----> Step 3: Restarting service on server..."
-ssh -i "$KEY" ubuntu@"$HOST" << EOF
-  cd /home/ubuntu/services/"$SERVICE"
-  npm install
-  pm2 restart startup || pm2 start server.js --name startup
-EOF
+# Step 1
+printf "\n----> Build the distribution package\n"
+rm -rf build
+mkdir -p build/public
+npm install # make sure vite is installed so that we can bundle
+npm run build # build the React front end
+cp -r dist/* build/public # move the React front end to the target distribution
+cp -r service/*.js build # move the back end service files
+cp -r service/*.json build
+cp -r service/src build # include the entire src folder
 
-echo ""
-echo "✅ Deployment complete!"
+# Step 2
+printf "\n----> Clearing out previous distribution on the target\n"
+ssh -i "$key" ubuntu@$hostname << ENDSSH
+rm -rf services/${service}
+mkdir -p services/${service}
+ENDSSH
+
+# Step 3
+printf "\n----> Copy the distribution package to the target\n"
+scp -r -i "$key" build/* ubuntu@$hostname:services/$service
+
+# Step 4
+printf "\n----> Deploy the service on the target\n"
+ssh -i "$key" ubuntu@$hostname << ENDSSH
+bash -i
+cd services/${service}
+npm install
+pm2 restart ${service} || pm2 start server.js --name ${service}
+ENDSSH
+
+# Step 5
+printf "\n----> Removing local copy of the distribution package\n"
+rm -rf build
+rm -rf dist
