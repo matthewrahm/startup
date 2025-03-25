@@ -26,9 +26,9 @@ npm install
 npm run build
 cp -r dist/* build/public
 
-# Step 3: Copy everything backend-related
+# Step 3: Copy everything backend-related into the `build` directory
 cp -r service/* build/
-cp -r service/src build/src
+cp -r service/src build/src  # 🔥 This preserves the src directory and its structure
 
 # Step 4: Deploy to server
 ssh -i "$key" ubuntu@"$hostname" << EOF
