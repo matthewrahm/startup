@@ -23,7 +23,7 @@ echo "----> Step 1: Build the frontend"
 npm install
 npm run build
 
-# Check if build/public was created
+# Check if build/public/index.html exists
 if [ ! -f "build/public/index.html" ]; then
   echo "❌ Build failed — build/public/index.html not found. Exiting..."
   exit 1
@@ -32,7 +32,7 @@ fi
 #### 2. Upload to server
 echo ""
 echo "----> Step 2: Upload files to server"
-scp -r . -i "$KEY" ubuntu@"$HOST":/home/ubuntu/services/"$SERVICE"
+scp -r -i "$KEY" . ubuntu@"$HOST":/home/ubuntu/services/"$SERVICE"/
 
 #### 3. SSH into server and restart PM2
 echo ""

@@ -35,7 +35,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'build', 'public')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 // API Routes
 app.use('/api', (req, res) => {
@@ -44,7 +44,7 @@ app.use('/api', (req, res) => {
 
 // All other GET requests not handled before will return the React app
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build',  'public',  'index.html'));
+  res.sendFile(path.join(__dirname, 'build',  'index.html'));
 });
 
 // Socket.IO connection handling
