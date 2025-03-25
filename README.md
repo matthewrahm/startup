@@ -102,17 +102,17 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 - [ x ] **Static middleware for frontend** - I did complete this part of the deliverable adding static middleware for the service.
 - [ x ] **Calls to third party endpoints** - I did complete this part of the deliverable using CoinGecko API to fetch live cryptocurrency dat through using Axios and Fetch to make GET requests from the backend.
 - [ x ] **Backend service endpoints** - I did complete this part of the deliverable making routes fetching live crypto data from CoinGecko.
-- [ ] **Frontend calls service endpoints** - I did not complete this part of the deliverable.
+- [ x ] **Frontend calls service endpoints** - I did complete this part of the deliverable. The React frontend communicates with the backend API using the fetch and axios requests.
 
 ## 🚀 DB/Login deliverable
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **User registration** - I did not complete this part of the deliverable.
-- [ ] **User login and logout** - I did not complete this part of the deliverable.
-- [ ] **Stores data in MongoDB** - I did not complete this part of the deliverable.
-- [ ] **Stores credentials in MongoDB** - I did not complete this part of the deliverable.
-- [ ] **Restricts functionality based on authentication** - I did not complete this part of the deliverable.
+- [ x ] **User registration** - I implemented a registration endpoint that stores new users in MongoDB with hashed passwords.
+- [ x ] **User login and logout** - I created login/logout routes that issue and clear secure auth cookies based on stored tokens.
+- [ x ] **Stores data in MongoDB** - User accounts and application data are successfully stored and retrieved from MongoDB.
+- [ x ] **Stores credentials in MongoDB** - Passwords are securely hashed using bcrypt and stored in the database during registration.
+- [ x ] **Restricts functionality based on authentication** - API routes like watchlist data are protected with middleware that checks the auth cookie before proceeding.
 
 ## 🚀 WebSocket deliverable
 
