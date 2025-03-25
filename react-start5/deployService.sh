@@ -24,11 +24,15 @@ mkdir -p build/public
 # Step 2: Install & Build frontend
 npm install
 npm run build
+cp -r src build/src
 cp -r dist/* build/public
+cp package.json package-lock.json build/
 
-# Step 3: Copy everything backend-related into the `build` directory
-cp -r service/* build/
-cp -r service/src build/src  # 🔥 This preserves the src directory and its structure
+
+# Step 3: Copy backend files and src
+cp -rf service/startup/*.js build/
+cp -rf service/startup/*.json build/
+cp -r src build/src
 
 # Step 4: Deploy to server
 ssh -i "$key" ubuntu@"$hostname" << EOF
