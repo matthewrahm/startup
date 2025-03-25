@@ -1,65 +1,56 @@
 #!/bin/bash
 
-while getopts k:h:s: flag; do
-  case "${flag}" in
-    k) key=${OPTARG};;
-    h) hostname=${OPTARG};;
-    s) service=${OPTARG};;
+# Usage: ./deployService.sh -k <pem-file> -h <host> -s <service-name>
+
+while getopts "k:h:s:" opt; do
+  case $opt in
+    k) KEY="$OPTARG" ;;
+    h) HOST="$OPTARG" ;;
+    s) SERVICE="$OPTARG" ;;
+    \?) echo "Invalid option -$OPTARG" >&2; exit 1 ;;
   esac
 done
 
-if [[ -z "$key" || -z "$hostname" || -z "$service" ]]; then
-  echo "Missing required parameter."
-  echo "syntax: deployService.sh -k <pem key file> -h <hostname> -s <service>"
+if [ -z "$KEY" ] || [ -z "$HOST" ] || [ -z "$SERVICE" ]; then
+  echo "Usage: ./deployService.sh -k <pem-file> -h <host> -s <service-name>"
   exit 1
 fi
 
-echo "----> Deploying service '$service' to '$hostname' using key '$key'"
+echo
+echo "----> Deploying service '$SERVICE' to '$HOST' using key '$KEY'"
+echo
 
-# Step 1: Build frontend
+# Step 1: Build frontend with Vite (output already goes to build/public)
 echo "----> Step 1: Build frontend with Vite"
-rm -rf build dist
 npm install
-npm run build
+npm run build || { echo "❌ Build failed"; exit 1; }
 
-# Create build folder and move frontend
-mkdir -p build/public
-cp -r dist/* build/public
+# Step 2: Upload to server
+echo
+echo "----> Step 2: Upload service files to server"
+ssh -i "$KEY" ubuntu@$HOST "mkdir -p ~/services/$SERVICE"
+scp -i "$KEY" -r \
+  build/public \
+  src \
+  package.json \
+  package-lock.json \
+  .env \
+  server.js \
+  ubuntu@$HOST:~/services/$SERVICE/
 
-# Step 2: Copy backend files
-echo "----> Step 2: Copy backend files"
-cp service/startup/*.js build/
-cp service/startup/*.json build/
-cp package*.json build/
-cp -r src build/
+# Step 3: Install backend dependencies
+echo
+echo "----> Step 3: Install backend dependencies on server"
+ssh -i "$KEY" ubuntu@$HOST "cd ~/services/$SERVICE && npm install"
 
-# Step 3: SSH into server and prepare
-echo "----> Step 3: Clean remote and prepare folder"
-ssh -i "$key" ubuntu@$hostname << ENDSSH
-  rm -rf services/${service}
-  mkdir -p services/${service}
-ENDSSH
-
-# Step 4: SCP to remote
-echo "----> Step 4: Uploading project to server"
-scp -i "$key" -r build/* ubuntu@$hostname:services/$service
-
-# Step 5: Install & Start with PM2
-echo "----> Step 5: Install & start service with PM2"
-ssh -i "$key" ubuntu@$hostname << ENDSSH
-  cd services/$service
-  npm install
-
-  # Optional: Export .env vars if needed
-  export NODE_ENV=production
-
-  pm2 delete $service || true
-  pm2 start server.js --name $service
+# Step 4: Restart PM2
+echo
+echo "----> Step 4: Restart PM2 process"
+ssh -i "$KEY" ubuntu@$HOST "
+  pm2 delete $SERVICE || true
+  pm2 start server.js --name $SERVICE --cwd ~/services/$SERVICE
   pm2 save
-ENDSSH
+"
 
-# Step 6: Clean up
-echo "----> Step 6: Clean up local build"
-rm -rf build dist
-
-echo "✅ Deployment complete for $service to $hostname"
+echo
+echo "✅ Deployment of '$SERVICE' complete!"
