@@ -21,21 +21,43 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = (userData) => {
-    const userInfo = {
-      username: userData.username,
-      isAuthenticated: true,
-      loginTime: new Date().toISOString()
-    };
-    
-    // Update user state
-    setUser(userInfo);
-    
-    // Save to localStorage
+  const login = async (userData) => {
     try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userData.email,
+          password: userData.password
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      
+      // Create user info object with the response data
+      const userInfo = {
+        ...data.user,
+        token: data.token,
+        isAuthenticated: true,
+        loginTime: new Date().toISOString()
+      };
+      
+      // Update user state
+      setUser(userInfo);
+      
+      // Save to localStorage
       localStorage.setItem('user', JSON.stringify(userInfo));
+      
+      return userInfo;
     } catch (error) {
-      console.error("Error saving user to localStorage:", error);
+      console.error("Login error:", error);
+      throw error;
     }
   };
 
