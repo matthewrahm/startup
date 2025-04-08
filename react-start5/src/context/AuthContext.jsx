@@ -21,9 +21,9 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = async (userData) => {
+  const register = async (userData) => {
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,11 +34,52 @@ export const AuthProvider = ({ children }) => {
         })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Login failed');
+        throw new Error(data.message || 'Registration failed');
       }
 
-      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    }
+  };
+
+  const login = async (userData) => {
+    try {
+      // First try to login
+      const loginResponse = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userData.email,
+          password: userData.password
+        })
+      });
+
+      const loginData = await loginResponse.json();
+      
+      if (loginResponse.ok) {
+        // Login successful
+        return loginData;
+      } else {
+        // Login failed, try to register
+        console.log("Login failed, attempting registration...");
+        return await register(userData);
+      }
+    } catch (error) {
+      console.error("Authentication error:", error);
+      throw new Error(error.message || 'Failed to authenticate. Please try again.');
+    }
+  };
+
+  const handleLogin = async (userData) => {
+    try {
+      const data = await login(userData);
       
       // Create user info object with the response data
       const userInfo = {
@@ -56,7 +97,7 @@ export const AuthProvider = ({ children }) => {
       
       return userInfo;
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Authentication error:", error);
       throw error;
     }
   };
@@ -75,7 +116,7 @@ export const AuthProvider = ({ children }) => {
 
   // Provide auth context values
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login: handleLogin, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

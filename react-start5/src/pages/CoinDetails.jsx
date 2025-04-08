@@ -5,6 +5,7 @@ import { useWatchlist } from '../context/WatchlistContext';
 import FadeInImage from '../components/FadeInImage';
 import PriceChart from '../components/PriceChart';
 import { fetchCoinDetails } from '../services/api';
+import OnboardingTooltip from '../components/OnboardingTooltip';
 
 function CoinDetails() {
   const { id } = useParams();
@@ -151,20 +152,30 @@ function CoinDetails() {
             </div>
             <div className="coin-details-title">
               <h1>{coinData?.name} <span className="coin-symbol">({coinData?.symbol})</span></h1>
-              <div className="coin-price-container">
-                <span className="coin-price">{coinData?.price}</span>
-                <span className={`coin-change ${coinData?.change24h.startsWith('-') ? 'negative' : 'positive'}`}>
-                  {coinData?.change24h}
-                </span>
-              </div>
+              <OnboardingTooltip 
+                content="The current price and 24-hour price change percentage. Green means the price went up, red means it went down."
+                position="bottom"
+              >
+                <div className="coin-price-container">
+                  <span className="coin-price">{coinData?.price}</span>
+                  <span className={`coin-change ${coinData?.change24h.startsWith('-') ? 'negative' : 'positive'}`}>
+                    {coinData?.change24h}
+                  </span>
+                </div>
+              </OnboardingTooltip>
             </div>
             <div className="coin-details-action">
-              <button
-                onClick={handleAddToWatchlist}
-                className="watchlist-btn"
+              <OnboardingTooltip 
+                content="Add this cryptocurrency to your watchlist to track its price and changes."
+                position="left"
               >
-                Add to Watchlist
-              </button>
+                <button
+                  onClick={handleAddToWatchlist}
+                  className="watchlist-btn"
+                >
+                  Add to Watchlist
+                </button>
+              </OnboardingTooltip>
               {notification.show && notification.coinId === coinData?.id && (
                 <div className={`notification-inline ${notification.type}`}>
                   <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
@@ -178,24 +189,46 @@ function CoinDetails() {
           </div>
           
           <div className="coin-stats-grid">
-            <div className="coin-stat-card">
-              <h3>Market Cap</h3>
-              <p>{coinData?.marketCap}</p>
-            </div>
-            <div className="coin-stat-card">
-              <h3>Volume (24h)</h3>
-              <p>{coinData?.volume}</p>
-            </div>
-            <div className="coin-stat-card">
-              <h3>Transactions (24h)</h3>
-              <p>{coinData?.txns}</p>
-            </div>
+            <OnboardingTooltip 
+              content="Market cap is the total value of all coins in circulation. It's calculated by multiplying the current price by the total number of coins."
+              position="top"
+            >
+              <div className="coin-stat-card">
+                <h3>Market Cap</h3>
+                <p>{coinData?.marketCap}</p>
+              </div>
+            </OnboardingTooltip>
+
+            <OnboardingTooltip 
+              content="Volume shows how much trading activity there is in the last 24 hours. Higher volume usually means more market interest."
+              position="top"
+            >
+              <div className="coin-stat-card">
+                <h3>Volume (24h)</h3>
+                <p>{coinData?.volume}</p>
+              </div>
+            </OnboardingTooltip>
+
+            <OnboardingTooltip 
+              content="The number of transactions processed on the blockchain in the last 24 hours. This shows how actively the network is being used."
+              position="top"
+            >
+              <div className="coin-stat-card">
+                <h3>Transactions (24h)</h3>
+                <p>{coinData?.txns}</p>
+              </div>
+            </OnboardingTooltip>
           </div>
           
-          <div className="coin-chart-container">
-            <h2>Price Chart</h2>
-            <PriceChart coinId={id} />
-          </div>
+          <OnboardingTooltip 
+            content="This chart shows the price history over time. You can hover over it to see specific prices at different times."
+            position="top"
+          >
+            <div className="coin-chart-container">
+              <h2>Price Chart</h2>
+              <PriceChart coinId={id} />
+            </div>
+          </OnboardingTooltip>
           
           <div className="coin-description">
             <h2>About {coinData?.name}</h2>
@@ -206,27 +239,50 @@ function CoinDetails() {
             <div className="coin-links">
               <h2>Resources</h2>
               <div className="links-grid">
-                <a href={coinData.website} target="_blank" rel="noopener noreferrer" className="resource-link">
-                  <span className="link-icon">🌐</span>
-                  <span className="link-text">Website</span>
-                </a>
+                <OnboardingTooltip 
+                  content="Visit the official website to learn more about this cryptocurrency."
+                  position="top"
+                >
+                  <a href={coinData.website} target="_blank" rel="noopener noreferrer" className="resource-link">
+                    <span className="link-icon">🌐</span>
+                    <span className="link-text">Website</span>
+                  </a>
+                </OnboardingTooltip>
+
                 {coinData.github && (
-                  <a href={coinData.github} target="_blank" rel="noopener noreferrer" className="resource-link">
-                    <span className="link-icon">💻</span>
-                    <span className="link-text">GitHub</span>
-                  </a>
+                  <OnboardingTooltip 
+                    content="View the source code and development activity on GitHub."
+                    position="top"
+                  >
+                    <a href={coinData.github} target="_blank" rel="noopener noreferrer" className="resource-link">
+                      <span className="link-icon">💻</span>
+                      <span className="link-text">GitHub</span>
+                    </a>
+                  </OnboardingTooltip>
                 )}
+
                 {coinData.reddit && (
-                  <a href={coinData.reddit} target="_blank" rel="noopener noreferrer" className="resource-link">
-                    <span className="link-icon">🔄</span>
-                    <span className="link-text">Reddit</span>
-                  </a>
+                  <OnboardingTooltip 
+                    content="Join the community discussion on Reddit."
+                    position="top"
+                  >
+                    <a href={coinData.reddit} target="_blank" rel="noopener noreferrer" className="resource-link">
+                      <span className="link-icon">🔄</span>
+                      <span className="link-text">Reddit</span>
+                    </a>
+                  </OnboardingTooltip>
                 )}
+
                 {coinData.twitter && (
-                  <a href={coinData.twitter} target="_blank" rel="noopener noreferrer" className="resource-link">
-                    <span className="link-icon">🐦</span>
-                    <span className="link-text">Twitter</span>
-                  </a>
+                  <OnboardingTooltip 
+                    content="Follow official updates and announcements on Twitter."
+                    position="top"
+                  >
+                    <a href={coinData.twitter} target="_blank" rel="noopener noreferrer" className="resource-link">
+                      <span className="link-icon">🐦</span>
+                      <span className="link-text">Twitter</span>
+                    </a>
+                  </OnboardingTooltip>
                 )}
               </div>
             </div>

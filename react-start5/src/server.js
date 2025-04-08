@@ -3,15 +3,271 @@ const cors = require('cors');
 const path = require('path');
 const morgan = require('morgan');
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const WebSocket = require('ws');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Create HTTP server
+const server = require('http').createServer(app);
+
+// Create WebSocket server
+const wss = new WebSocket.Server({ server });
+
+// WebSocket connection handling
+wss.on('connection', (ws) => {
+  console.log('New WebSocket connection established');
+
+  // Send initial data
+  const sendInitialData = async () => {
+    try {
+      const [solanaData, topCoins] = await Promise.all([
+        fetchCoinDetails('solana'),
+        fetchTopCoins()
+      ]);
+      
+      ws.send(JSON.stringify({
+        type: 'initialData',
+        data: {
+          solana: solanaData,
+          topCoins: topCoins
+        }
+      }));
+    } catch (error) {
+      console.error('Error sending initial data:', error);
+    }
+  };
+
+  // Send data periodically
+  const interval = setInterval(async () => {
+    try {
+      const [solanaData, topCoins] = await Promise.all([
+        fetchCoinDetails('solana'),
+        fetchTopCoins()
+      ]);
+      
+      ws.send(JSON.stringify({
+        type: 'update',
+        data: {
+          solana: solanaData,
+          topCoins: topCoins
+        }
+      }));
+    } catch (error) {
+      console.error('Error sending periodic update:', error);
+    }
+  }, 10000); // Update every 10 seconds
+
+  // Handle client messages
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+      console.log('Received message:', data);
+      
+      // Handle different message types here
+      if (data.type === 'subscribe') {
+        // Handle subscription requests
+      }
+    } catch (error) {
+      console.error('Error handling message:', error);
+    }
+  });
+
+  // Handle connection close
+  ws.on('close', () => {
+    console.log('WebSocket connection closed');
+    clearInterval(interval);
+  });
+
+  // Send initial data
+  sendInitialData();
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/crypto-app', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('MongoDB connection error:', err));
+
+// User Schema
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  watchlist: [{
+    id: String,
+    name: String,
+    symbol: String,
+    price: String,
+    volume: String,
+    txns: String,
+    image: String,
+    addedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Method to compare passwords
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+const User = mongoose.model('User', userSchema);
+
+// JWT Secret
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+// Authentication Routes
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email and password are required' 
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'User already exists' 
+      });
+    }
+
+    // Create new user
+    const user = new User({ email, password });
+    await user.save();
+
+    // Generate token
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Return user data without password
+    const userData = {
+      id: user._id,
+      email: user.email,
+      watchlist: user.watchlist
+    };
+
+    return res.status(201).json({
+      success: true,
+      user: userData,
+      token
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    return res.status(500).json({ 
+      success: false,
+      message: 'Error creating user',
+      error: error.message 
+    });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email and password are required' 
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Invalid credentials' 
+      });
+    }
+
+    // Check password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Invalid credentials' 
+      });
+    }
+
+    // Generate token
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Return user data without password
+    const userData = {
+      id: user._id,
+      email: user.email,
+      watchlist: user.watchlist
+    };
+
+    return res.json({
+      success: true,
+      user: userData,
+      token
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.status(500).json({ 
+      success: false,
+      message: 'Error logging in',
+      error: error.message 
+    });
+  }
+});
 
 // Set up Coinbase API client
 const COINBASE_API_URL = 'https://api.coinbase.com/v2';
@@ -421,7 +677,7 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API available at http://localhost:${PORT}/api`);
   console.log(`Visit http://localhost:${PORT} to view the application`);

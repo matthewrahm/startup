@@ -10,6 +10,7 @@ function Login() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
   const { user, login, loading } = useAuth();
 
@@ -34,12 +35,30 @@ function Login() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    setIsRegistering(false);
     
     try {
       await login(formData);
       navigate('/home');
     } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      // If the error is about registration, show a more user-friendly message
+      if (err.message.includes('already exists')) {
+        setError('This email is already registered. Please try logging in.');
+      } else if (err.message.includes('registration')) {
+        setIsRegistering(true);
+        setError('Creating your account...');
+        // Try registration again
+        try {
+          await login(formData);
+          navigate('/home');
+        } catch (registerErr) {
+          setError('Failed to create account. Please try again.');
+        }
+      } else {
+        setError(err.message || 'An error occurred. Please try again.');
+      }
+      // Clear password field on error
+      setFormData(prev => ({ ...prev, password: '' }));
     } finally {
       setIsLoading(false);
     }
@@ -54,12 +73,23 @@ function Login() {
       <div className="login-content">
         <div className="login-header">
           <h1>Welcome to Ramen Crypto</h1>
-          <p>Login to start tracking crypto</p>
+          <p>{isRegistering ? 'Creating your account...' : 'Enter your email to get started'}</p>
         </div>
         
         <div className="login-form-container">
-          <h2>Login to Begin</h2>
-          {error && <div className="error-message">{error}</div>}
+          <h2>{isRegistering ? 'Create Account' : 'Login'}</h2>
+          {error && (
+            <div className="error-message">
+              {error}
+              <button 
+                className="error-close" 
+                onClick={() => setError('')}
+                aria-label="Close error message"
+              >
+                ×
+              </button>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
               <input 
@@ -71,6 +101,7 @@ function Login() {
                 value={formData.email}
                 onChange={handleChange}
                 required 
+                disabled={isLoading}
               />
             </div>
             <div className="form-group">
@@ -83,6 +114,7 @@ function Login() {
                 value={formData.password}
                 onChange={handleChange}
                 required 
+                disabled={isLoading}
               />
             </div>
             <button 
@@ -90,9 +122,12 @@ function Login() {
               className="login-button"
               disabled={isLoading}
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? 'Processing...' : isRegistering ? 'Creating Account...' : 'Continue'}
             </button>
           </form>
+          <div className="login-help">
+            <p>Your account will be created automatically if it doesn't exist</p>
+          </div>
         </div>
       </div>
     </div>
