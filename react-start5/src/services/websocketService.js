@@ -5,40 +5,56 @@ class WebSocketService {
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
     this.reconnectDelay = 3000; // 3 seconds
+    this.isConnected = false;
+    this.connectionPromise = null;
   }
 
   connect() {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      return;
+    if (this.connectionPromise) {
+      return this.connectionPromise;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}`;
-    
-    this.socket = new WebSocket(wsUrl);
-
-    this.socket.onopen = () => {
-      console.log('WebSocket connected');
-      this.reconnectAttempts = 0;
-    };
-
-    this.socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        this.notifySubscribers(data);
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+    this.connectionPromise = new Promise((resolve, reject) => {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        resolve();
+        return;
       }
-    };
 
-    this.socket.onclose = () => {
-      console.log('WebSocket disconnected');
-      this.handleReconnect();
-    };
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}`;
+      
+      this.socket = new WebSocket(wsUrl);
 
-    this.socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+      this.socket.onopen = () => {
+        console.log('WebSocket connected');
+        this.isConnected = true;
+        this.reconnectAttempts = 0;
+        resolve();
+      };
+
+      this.socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          this.notifySubscribers(data);
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+
+      this.socket.onclose = () => {
+        console.log('WebSocket disconnected');
+        this.isConnected = false;
+        this.handleReconnect();
+      };
+
+      this.socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        this.isConnected = false;
+        reject(error);
+      };
+    });
+
+    return this.connectionPromise;
   }
 
   handleReconnect() {
@@ -47,6 +63,7 @@ class WebSocketService {
       console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
       
       setTimeout(() => {
+        this.connectionPromise = null;
         this.connect();
       }, this.reconnectDelay);
     } else {
@@ -86,7 +103,13 @@ class WebSocketService {
     if (this.socket) {
       this.socket.close();
       this.socket = null;
+      this.isConnected = false;
+      this.connectionPromise = null;
     }
+  }
+
+  getConnectionState() {
+    return this.isConnected;
   }
 }
 

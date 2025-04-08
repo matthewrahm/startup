@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import { useAuth } from "../context/AuthContext";
@@ -21,31 +21,74 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [helpExpanded, setHelpExpanded] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
+
+  const updateData = useCallback((data) => {
+    if (data.solana) {
+      setSolanaData(prev => {
+        // Only update if the data has changed
+        if (JSON.stringify(prev) !== JSON.stringify(data.solana)) {
+          return data.solana;
+        }
+        return prev;
+      });
+    }
+    if (data.topCoins) {
+      setFeaturedCoins(prev => {
+        // Only update if the data has changed
+        if (JSON.stringify(prev) !== JSON.stringify(data.topCoins)) {
+          return data.topCoins;
+        }
+        return prev;
+      });
+    }
+  }, []);
 
   useEffect(() => {
     console.log("Home component mounted");
     
-    // Connect to WebSocket
-    websocketService.connect();
+    let mounted = true;
+    let wsCleanup = null;
 
-    // Subscribe to WebSocket updates
-    const handleInitialData = (data) => {
-      setSolanaData(data.solana);
-      setFeaturedCoins(data.topCoins);
-      setLoading(false);
-      setError(null);
+    const initializeWebSocket = async () => {
+      try {
+        // Wait for WebSocket connection
+        await websocketService.connect();
+        if (!mounted) return;
+
+        setWsConnected(true);
+
+        // Subscribe to WebSocket updates
+        const handleInitialData = (data) => {
+          if (!mounted) return;
+          updateData(data);
+          setLoading(false);
+          setError(null);
+        };
+
+        const handleUpdate = (data) => {
+          if (!mounted) return;
+          updateData(data);
+        };
+
+        websocketService.subscribe('initialData', handleInitialData);
+        websocketService.subscribe('update', handleUpdate);
+
+        wsCleanup = () => {
+          websocketService.unsubscribe('initialData', handleInitialData);
+          websocketService.unsubscribe('update', handleUpdate);
+        };
+      } catch (error) {
+        console.error('WebSocket connection failed:', error);
+        if (!mounted) return;
+        // Fallback to REST API
+        fetchData();
+      }
     };
 
-    const handleUpdate = (data) => {
-      setSolanaData(data.solana);
-      setFeaturedCoins(data.topCoins);
-    };
-
-    websocketService.subscribe('initialData', handleInitialData);
-    websocketService.subscribe('update', handleUpdate);
-
-    // Fallback to REST API if WebSocket fails
     const fetchData = async () => {
+      if (!mounted) return;
+      
       setLoading(true);
       try {
         console.log("Home: Fetching Solana data and featured coins from CoinGecko...");
@@ -54,6 +97,8 @@ function Home() {
           fetchCoinDetails('solana'),
           fetchTopCoins()
         ]);
+        
+        if (!mounted) return;
         
         console.log("Home: Data received from CoinGecko:", { 
           solana: solana?.name || 'No data', 
@@ -89,6 +134,7 @@ function Home() {
         setError(null);
       } catch (err) {
         console.error('Home: Error fetching data from CoinGecko:', err);
+        if (!mounted) return;
         setError('Failed to load cryptocurrency data. Please try again.');
         
         setFeaturedCoins([
@@ -97,19 +143,24 @@ function Home() {
           { id: 'ripple', name: "XRP", symbol: "XRP", price: "$0.50", volume: "$3B", txns: "300K", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", currentPrice: 0.50, change: "+2.1%" }
         ]);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchData();
+    // Initialize WebSocket first
+    initializeWebSocket();
 
     // Cleanup
     return () => {
-      websocketService.unsubscribe('initialData', handleInitialData);
-      websocketService.unsubscribe('update', handleUpdate);
+      mounted = false;
+      if (wsCleanup) {
+        wsCleanup();
+      }
       websocketService.disconnect();
     };
-  }, []);
+  }, [updateData]);
 
   const handleAddToWatchlist = (coin) => {
     const watchlistCoin = {

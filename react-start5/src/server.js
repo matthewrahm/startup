@@ -22,6 +22,20 @@ const wss = new WebSocket.Server({ server });
 wss.on('connection', (ws) => {
   console.log('New WebSocket connection established');
 
+  let isAlive = true;
+  const heartbeatInterval = setInterval(() => {
+    if (!isAlive) {
+      console.log('Client heartbeat failed, terminating connection');
+      return ws.terminate();
+    }
+    isAlive = false;
+    ws.ping();
+  }, 30000);
+
+  ws.on('pong', () => {
+    isAlive = true;
+  });
+
   // Send initial data
   const sendInitialData = async () => {
     try {
@@ -30,37 +44,41 @@ wss.on('connection', (ws) => {
         fetchTopCoins()
       ]);
       
-      ws.send(JSON.stringify({
-        type: 'initialData',
-        data: {
-          solana: solanaData,
-          topCoins: topCoins
-        }
-      }));
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'initialData',
+          data: {
+            solana: solanaData,
+            topCoins: topCoins
+          }
+        }));
+      }
     } catch (error) {
       console.error('Error sending initial data:', error);
     }
   };
 
   // Send data periodically
-  const interval = setInterval(async () => {
+  const updateInterval = setInterval(async () => {
     try {
       const [solanaData, topCoins] = await Promise.all([
         fetchCoinDetails('solana'),
         fetchTopCoins()
       ]);
       
-      ws.send(JSON.stringify({
-        type: 'update',
-        data: {
-          solana: solanaData,
-          topCoins: topCoins
-        }
-      }));
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'update',
+          data: {
+            solana: solanaData,
+            topCoins: topCoins
+          }
+        }));
+      }
     } catch (error) {
       console.error('Error sending periodic update:', error);
     }
-  }, 10000); // Update every 10 seconds
+  }, 30000); // Update every 30 seconds instead of 10
 
   // Handle client messages
   ws.on('message', (message) => {
@@ -80,7 +98,15 @@ wss.on('connection', (ws) => {
   // Handle connection close
   ws.on('close', () => {
     console.log('WebSocket connection closed');
-    clearInterval(interval);
+    clearInterval(heartbeatInterval);
+    clearInterval(updateInterval);
+  });
+
+  // Handle errors
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
+    clearInterval(heartbeatInterval);
+    clearInterval(updateInterval);
   });
 
   // Send initial data
