@@ -7,116 +7,52 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on component mount
-    try {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+    const checkAuth = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error("Error loading user from localStorage:", error);
+        localStorage.removeItem('user');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error loading user from localStorage:", error);
-    } finally {
-      // Set loading to false after checking authentication
-      setLoading(false);
-    }
+    };
+
+    checkAuth();
   }, []);
-
-  const register = async (userData) => {
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: userData.email,
-          password: userData.password
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-
-      return data;
-    } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
-    }
-  };
 
   const login = async (userData) => {
     try {
-      // First try to login
-      const loginResponse = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: userData.email,
-          password: userData.password
-        })
-      });
-
-      const loginData = await loginResponse.json();
-      
-      if (loginResponse.ok) {
-        // Login successful
-        return loginData;
-      } else {
-        // Login failed, try to register
-        console.log("Login failed, attempting registration...");
-        return await register(userData);
-      }
-    } catch (error) {
-      console.error("Authentication error:", error);
-      throw new Error(error.message || 'Failed to authenticate. Please try again.');
-    }
-  };
-
-  const handleLogin = async (userData) => {
-    try {
-      const data = await login(userData);
-      
-      // Create user info object with the response data
+      // Create a simple user object
       const userInfo = {
-        ...data.user,
-        token: data.token,
+        email: userData.email,
+        username: userData.email.split('@')[0], // Use email prefix as username
         isAuthenticated: true,
         loginTime: new Date().toISOString()
       };
-      
-      // Update user state
+
+      // Update state and localStorage
       setUser(userInfo);
-      
-      // Save to localStorage
       localStorage.setItem('user', JSON.stringify(userInfo));
-      
+
       return userInfo;
     } catch (error) {
-      console.error("Authentication error:", error);
+      console.error("Login error:", error);
       throw error;
     }
   };
 
   const logout = () => {
-    // Clear user state
     setUser(null);
-    
-    // Remove from localStorage
-    try {
-      localStorage.removeItem('user');
-    } catch (error) {
-      console.error("Error removing user from localStorage:", error);
-    }
+    localStorage.removeItem('user');
   };
 
-  // Provide auth context values
   return (
-    <AuthContext.Provider value={{ user, login: handleLogin, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
