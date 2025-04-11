@@ -7,6 +7,7 @@ class WebSocketService {
     this.reconnectDelay = 3000; // 3 seconds
     this.isConnected = false;
     this.connectionPromise = null;
+    this.reconnectTimeout = null;
   }
 
   connect() {
@@ -16,6 +17,7 @@ class WebSocketService {
 
     this.connectionPromise = new Promise((resolve, reject) => {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.isConnected = true;
         resolve();
         return;
       }
@@ -58,53 +60,62 @@ class WebSocketService {
   }
 
   handleReconnect() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.log('Max reconnection attempts reached');
+      this.connectionPromise = null;
+      return;
+    }
+
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+
+    this.reconnectTimeout = setTimeout(() => {
       this.reconnectAttempts++;
       console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
-      
-      setTimeout(() => {
-        this.connectionPromise = null;
-        this.connect();
-      }, this.reconnectDelay);
-    } else {
-      console.error('Max reconnection attempts reached');
-    }
+      this.connectionPromise = null;
+      this.connect().catch(error => {
+        console.error('Reconnection failed:', error);
+      });
+    }, this.reconnectDelay);
   }
 
-  subscribe(type, callback) {
-    if (!this.subscribers.has(type)) {
-      this.subscribers.set(type, new Set());
+  disconnect() {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
     }
-    this.subscribers.get(type).add(callback);
+    if (this.socket) {
+      this.socket.close();
+    }
+    this.isConnected = false;
+    this.connectionPromise = null;
   }
 
-  unsubscribe(type, callback) {
-    if (this.subscribers.has(type)) {
-      this.subscribers.get(type).delete(callback);
+  subscribe(eventType, callback) {
+    if (!this.subscribers.has(eventType)) {
+      this.subscribers.set(eventType, new Set());
+    }
+    this.subscribers.get(eventType).add(callback);
+  }
+
+  unsubscribe(eventType, callback) {
+    if (this.subscribers.has(eventType)) {
+      this.subscribers.get(eventType).delete(callback);
     }
   }
 
   notifySubscribers(data) {
+    if (!data || !data.type) return;
+    
     const callbacks = this.subscribers.get(data.type);
     if (callbacks) {
-      callbacks.forEach(callback => callback(data.data));
-    }
-  }
-
-  sendMessage(message) {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(message));
-    } else {
-      console.error('WebSocket is not connected');
-    }
-  }
-
-  disconnect() {
-    if (this.socket) {
-      this.socket.close();
-      this.socket = null;
-      this.isConnected = false;
-      this.connectionPromise = null;
+      callbacks.forEach(callback => {
+        try {
+          callback(data.data);
+        } catch (error) {
+          console.error('Error in subscriber callback:', error);
+        }
+      });
     }
   }
 

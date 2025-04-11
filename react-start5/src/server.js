@@ -646,15 +646,49 @@ function getCoinImage(symbol) {
     'ETH': 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
     'SOL': 'https://cryptologos.cc/logos/solana-sol-logo.png',
     'ADA': 'https://cryptologos.cc/logos/cardano-ada-logo.png',
-    'DOT': 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png',
     'DOGE': 'https://cryptologos.cc/logos/dogecoin-doge-logo.png',
-    'LINK': 'https://cryptologos.cc/logos/chainlink-link-logo.png',
     'MATIC': 'https://cryptologos.cc/logos/polygon-matic-logo.png',
     'AVAX': 'https://cryptologos.cc/logos/avalanche-avax-logo.png',
-    'SHIB': 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png'
+    'SHIB': 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png',
+    'BNB': 'https://cryptologos.cc/logos/bnb-bnb-logo.png',
+    'XRP': 'https://cryptologos.cc/logos/xrp-xrp-logo.png',
+    'DOT': 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png',
+    'LINK': 'https://cryptologos.cc/logos/chainlink-link-logo.png',
+    'UNI': 'https://cryptologos.cc/logos/uniswap-uni-logo.png',
+    'LTC': 'https://cryptologos.cc/logos/litecoin-ltc-logo.png',
+    'ATOM': 'https://cryptologos.cc/logos/cosmos-atom-logo.png',
+    'AAVE': 'https://cryptologos.cc/logos/aave-aave-logo.png',
+    'ALGO': 'https://cryptologos.cc/logos/algorand-algo-logo.png',
+    'AXS': 'https://cryptologos.cc/logos/axie-infinity-axs-logo.png',
+    'BAT': 'https://cryptologos.cc/logos/basic-attention-token-bat-logo.png',
+    'COMP': 'https://cryptologos.cc/logos/compound-comp-logo.png',
+    'CRV': 'https://cryptologos.cc/logos/curve-dao-token-crv-logo.png',
+    'ENJ': 'https://cryptologos.cc/logos/enjin-coin-enj-logo.png',
+    'FIL': 'https://cryptologos.cc/logos/filecoin-fil-logo.png',
+    'GRT': 'https://cryptologos.cc/logos/the-graph-grt-logo.png',
+    'MANA': 'https://cryptologos.cc/logos/decentraland-mana-logo.png',
+    'MKR': 'https://cryptologos.cc/logos/maker-mkr-logo.png',
+    'SAND': 'https://cryptologos.cc/logos/the-sandbox-sand-logo.png',
+    'SNX': 'https://cryptologos.cc/logos/synthetix-network-token-snx-logo.png',
+    'SUSHI': 'https://cryptologos.cc/logos/sushiswap-sushi-logo.png',
+    'YFI': 'https://cryptologos.cc/logos/yearn-finance-yfi-logo.png',
+    'ZIL': 'https://cryptologos.cc/logos/zilliqa-zil-logo.png'
   };
-  
-  return imageMap[symbol] || '/solana.png';
+
+  // Try to get the image from our map first
+  const imageUrl = imageMap[symbol.toUpperCase()];
+  if (imageUrl) {
+    return imageUrl;
+  }
+
+  // If not found in our map, try to get from CoinGecko
+  try {
+    const coinId = symbol.toLowerCase();
+    return `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false`;
+  } catch (error) {
+    // If all else fails, return a generic crypto icon
+    return 'https://cryptologos.cc/logos/bitcoin-btc-logo.png';
+  }
 }
 
 function getDefaultPrice(symbol) {

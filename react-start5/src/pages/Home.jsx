@@ -137,6 +137,7 @@ function Home() {
         if (!mounted) return;
         setError('Failed to load cryptocurrency data. Please try again.');
         
+        // Set fallback data
         setFeaturedCoins([
           { id: 'bitcoin', name: "Bitcoin", symbol: "BTC", price: "$45,000", volume: "$28B", txns: "500K", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", currentPrice: 45000, change: "+5.2%" },
           { id: 'ethereum', name: "Ethereum", symbol: "ETH", price: "$2,800", volume: "$15B", txns: "800K", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", currentPrice: 2800, change: "+3.8%" },
@@ -150,7 +151,12 @@ function Home() {
     };
 
     // Initialize WebSocket first
-    initializeWebSocket();
+    initializeWebSocket().catch(error => {
+      console.error('WebSocket initialization failed:', error);
+      if (mounted) {
+        fetchData();
+      }
+    });
 
     // Cleanup
     return () => {
